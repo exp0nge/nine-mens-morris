@@ -1,4 +1,3 @@
-"use strict";
 const CENTER_POSITION = 3;
 
 function countNewMills(move){
@@ -56,3 +55,5 @@ function checkLose(player) {
 
   return false;
 }
+
+export { countNewMills, isValidMove, checkLose }
