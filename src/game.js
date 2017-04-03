@@ -1,5 +1,4 @@
-"use strict";
-const algorithm = require('./algorithm.js');
+import * as algorithm from './algorithm.js';
 
 const STATES = {
   UNAVAILABLE: 0,
@@ -90,8 +89,6 @@ function printBoard() {
 
 }
 
-startGame();
-
 function placeSoldier(move) {
   if (algorithm.isValidMove(move)){
     board[move.ROW][move.COL] = move.COLOR;
@@ -104,3 +101,9 @@ function placeSoldier(move) {
     }
   }
 }
+
+console.log("initializing game");
+
+startGame();
+
+console.log("success!");
