@@ -106,4 +106,4 @@ console.log("initializing game");
 
 startGame();
 
-console.log("success!");
+console.log("turn: " + GAME_PROPERTIES.TURN);
