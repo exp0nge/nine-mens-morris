@@ -1,7 +1,7 @@
 const CENTER_POSITION = 3;
 
 function countNewMills(move){
-  if (move.ROW == CENTER_POSITION) {
+  if (move.ROW === CENTER_POSITION) {
     if (move.COL < CENTER_POSITION) {
       return checkMill(move, 0, 2, true) +
              checkMill(move, 0, 6, false);
@@ -11,7 +11,7 @@ function countNewMills(move){
     }
   }
 
-  if (move.COL == CENTER_POSITION) {
+  if (move.COL === CENTER_POSITION) {
     if (move.ROW < CENTER_POSITION) {
       return checkMill(move, 0, 6, true) +
              checkMill(move, 0, 2, false);
@@ -59,6 +59,78 @@ function isRemovable(move) {
 /**
 Phase 2 Functions
 **/
+const SHIFT = {
+  LEFT: 0,
+  RIGHT: 1,
+  UP: 2,
+  DOWN: 3
+};
+
+function isValidShift(move) {
+  let i = move.ROW;
+  let j = move.COL;
+  let t1 = 0;
+  let t2 = 0;
+  let rowBounds = [0, 6];
+  let colBounds = [0, 6];
+
+  if (!isValidMove(move)) {
+    return false;
+  }
+
+  switch(move.SHIFT) {
+    case SHIFT.LEFT:
+      t2 = -1;
+      break;
+    case SHIFT.RIGHT:
+      t2 = 1;
+      break;
+    case SHIFT.UP:
+      t1 = 1;
+      break;
+    case SHIFT.DOWN:
+      t1 = -1;
+      break;
+    default:
+      return false;
+  }
+
+
+  if (move.ROW === CENTER_POSITION) {
+    if (move.COL < CENTER_POSITION) {
+      colBounds[1] = CENTER_POSITION;
+    } else {
+      colBounds[0] = CENTER_POSITION;
+    }
+  }
+
+  if (move.COL === CENTER_POSITION) {
+    if (move.ROW < CENTER_POSITION) {
+      rowBounds[1] = CENTER_POSITION;
+    } else {
+      rowBounds[0] = CENTER_POSITION;
+    }
+  }
+
+  while(true) {
+    i+=t1;
+    j+=t2;
+
+    if (i < rowBounds[0] || i > rowBounds[1] || j < colBounds[0] || j > colBounds[1]) { // Out of bounds
+      return false;
+    }
+
+    if (move.BOARD[i][j].ISAVAILABLE) {
+      if (move.BOARD[i][j].COLOR === null) {
+        move.SHIFTROW = i;
+        move.SHIFTCOL = j;
+        return true;
+      } else {
+        return false;
+      }
+    }
+  }
+}
 
 function checkLose(player) {
 
@@ -69,4 +141,4 @@ function checkLose(player) {
   return false;
 }
 
-export { countNewMills, isValidMove, isRemovable, checkLose };
+export { countNewMills, isValidMove, isRemovable, isValidShift, checkLose };
