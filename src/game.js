@@ -109,6 +109,21 @@ function placeSoldier(move) {
   }
 }
 
+function removeSoldier(move) {
+  if (algorithm.isValidPiece(move)){
+    board[move.ROW][move.COL] = STATES.AVAILABLE;
+    if (move.COLOR == PURPLE_TURN){
+      PURPLE_PLAYER.PLACED--;
+    } else {
+      YELLOW_PLAYER.PLACED--;
+    }
+    return true;
+  } else {
+    return false;
+  }
+}
+
+
 function phase1() {
   while (PURPLE_PLAYER.AVAILABLE > 0 || YELLOW_PLAYER.AVAILABLE > 0) {
       if(GAME_PROPERTIES.TURN === YELLOW_TURN) {
@@ -126,9 +141,9 @@ function phase1() {
 
       if (placeSoldier(move)) {
         // TODO: Check mills here
-        // if (algorithm.countNewMills(move) > 0) {
-        //   console.log("MILL");
-        // }
+        if (algorithm.countNewMills(move) > 0) {
+          console.log("MILL");
+        }
 
         GAME_PROPERTIES.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
       } else {

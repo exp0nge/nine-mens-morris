@@ -38,16 +38,22 @@ function checkMill(move, start, end, checkRow){
     if (pieceState === move.COLOR){
       count += 1;
     }
-    if (count == 3){
-      return 1;
-    } else {
-      return 0;
-    }
+  }
+  if (count == 3){
+    // TODO: change states of board to include isMill
+    return 1;
+  } else {
+    return 0;
   }
 }
 
 function isValidMove(move) {
   return move.BOARD[move.ROW][move.COL] === STATES.AVAILABLE;
+}
+
+function isValidPiece(move) {
+  // Is not part of a mill and has a piece
+  return move.BOARD[move.ROW][move.COL] === ;
 }
 
 /**
