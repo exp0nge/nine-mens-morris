@@ -1,10 +1,3 @@
-const STATES = {
-  UNAVAILABLE: 0,
-  AVAILABLE: 1,
-  PURPLE: 2,
-  YELLOW: 3
-};
-
 const CENTER_POSITION = 3;
 
 function countNewMills(move){
@@ -34,13 +27,19 @@ function countNewMills(move){
 function checkMill(move, start, end, checkRow){
   var count = 0;
   for (let i = start; i <= end; i++){
-    let pieceState = checkRow ? move.BOARD[move.ROW][i] : move.BOARD[i][move.COL];
-    if (pieceState === move.COLOR){
+    let tileState = checkRow ? move.BOARD[move.ROW][i] : move.BOARD[i][move.COL];
+    if (tileState.COLOR === move.COLOR){
       count += 1;
     }
   }
   if (count == 3){
-    // TODO: change states of board to include isMill
+    // change ISMILL to true
+    for (let i = start; i <= end; i++){
+      let tileState = checkRow ? move.BOARD[move.ROW][i] : move.BOARD[i][move.COL];
+      if (tileState.COLOR === move.COLOR){
+        tileState.ISMILL = true;
+      }
+    }
     return 1;
   } else {
     return 0;
@@ -48,12 +47,13 @@ function checkMill(move, start, end, checkRow){
 }
 
 function isValidMove(move) {
-  return move.BOARD[move.ROW][move.COL] === STATES.AVAILABLE;
+  return move.BOARD[move.ROW][move.COL].ISAVAILABLE;
 }
 
-function isValidPiece(move) {
+function isRemovable(move) {
   // Is not part of a mill and has a piece
-  return move.BOARD[move.ROW][move.COL] === ;
+  let tileState = move.BOARD[move.ROW][move.COL];
+  return (tileState.ISAVAILABLE && tileState.COLOR === move.COLOR && !tileState.ISMILL);
 }
 
 /**
@@ -69,4 +69,4 @@ function checkLose(player) {
   return false;
 }
 
-export { STATES, countNewMills, isValidMove, checkLose };
+export { countNewMills, isValidMove, isRemovable, checkLose };
