@@ -4,8 +4,18 @@
     <meta charset="utf-8">
     <title>Nine Mens Morris</title>
   </head>
+  <style media="screen">
+    #board-container {
+      width: 400px;
+      height: 400px;
+      margin: auto;
+    }
+  </style>
   <body>
-
-  <script src="./lib/bundle.js" charset="utf-8"></script>  
+  <div id="board-container">
+    <object id="board" data="./public/board.svg" type="image/svg+xml"></object>
+  </div>
+  <script src="./lib/control-bundle.js" charset="utf-8"></script>
+  <script src="./lib/main-bundle.js" charset="utf-8"></script>
   </body>
 </html>

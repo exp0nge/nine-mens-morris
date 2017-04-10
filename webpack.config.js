@@ -2,8 +2,11 @@ var path = require('path');
 var webpack = require('webpack');
 
 module.exports = {
-  entry: './src/game.js',
-  output: { path: __dirname, filename: 'lib/bundle.js' },
+  entry: {
+    main: './src/game.js',
+    control: './src/events.js'
+  },
+  output: { path: __dirname, filename: 'lib/[name]-bundle.js' },
   module: {
     loaders: [
       {
