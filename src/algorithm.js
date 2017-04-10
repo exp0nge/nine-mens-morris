@@ -47,7 +47,8 @@ function checkMill(move, start, end, checkRow){
 }
 
 function isValidMove(move) {
-  return move.BOARD[move.ROW][move.COL].ISAVAILABLE;
+  let tileState = move.BOARD[move.ROW][move.COL];
+  return (tileState.ISAVAILABLE && tileState.COLOR === null);
 }
 
 function isRemovable(move) {
@@ -74,10 +75,12 @@ function isValidShift(move) {
   let rowBounds = [0, 6];
   let colBounds = [0, 6];
 
-  if (!isValidMove(move)) {
+  // Make sure that there is a piece to move
+  if (!move.BOARD[move.ROW][move.COL].ISAVAILABLE) {
     return false;
   }
 
+  // Translation for shift
   switch(move.SHIFT) {
     case SHIFT.LEFT:
       t2 = -1;
@@ -86,16 +89,16 @@ function isValidShift(move) {
       t2 = 1;
       break;
     case SHIFT.UP:
-      t1 = 1;
+      t1 = -1;
       break;
     case SHIFT.DOWN:
-      t1 = -1;
+      t1 = 1;
       break;
     default:
       return false;
   }
 
-
+  // Special cases for center row/column
   if (move.ROW === CENTER_POSITION) {
     if (move.COL < CENTER_POSITION) {
       colBounds[1] = CENTER_POSITION;
@@ -112,7 +115,7 @@ function isValidShift(move) {
     }
   }
 
-  while(true) {
+  while(true) { // Continue moving in a direction
     i+=t1;
     j+=t2;
 
@@ -121,7 +124,7 @@ function isValidShift(move) {
     }
 
     if (move.BOARD[i][j].ISAVAILABLE) {
-      if (move.BOARD[i][j].COLOR === null) {
+      if (move.BOARD[i][j].COLOR === null) { // No piece there, we can shift
         move.SHIFTROW = i;
         move.SHIFTCOL = j;
         return true;
@@ -132,13 +135,4 @@ function isValidShift(move) {
   }
 }
 
-function checkLose(player) {
-
-  if (player.PLACED === 2) return true;
-
-  // TODO: Check for no more available moves
-
-  return false;
-}
-
-export { countNewMills, isValidMove, isRemovable, isValidShift, checkLose };
+export { countNewMills, isValidMove, isRemovable, isValidShift };
