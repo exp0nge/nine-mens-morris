@@ -1,18 +1,6 @@
 import * as algorithm from './algorithm.js';
-
-const STATES = {
-  UNAVAILABLE: 0,
-  AVAILABLE: 1,
-  PURPLE: 2,
-  YELLOW: 3
-};
-
-const MOVE = {
-  ROW: null,
-  COL: null,
-  COLOR: null,
-  BOARD: null
-};
+import { setUpClicks } from './events.js';
+import { SHARP_COLORS, STATES, makeMoveProp } from './common.js';
 
 const MATRIX_SIZE = 7;
 const board = new Array(MATRIX_SIZE);
@@ -91,8 +79,8 @@ function printBoard() {
 
 function placeSoldier(move) {
   if (algorithm.isValidMove(move)){
-    board[move.ROW][move.COL] = move.COLOR;
-    if (move.COLOR == PURPLE_TURN){
+    board[move.ROW][move.COL] = move.TURN;
+    if (move.TURN == PURPLE_TURN){
       PURPLE_PLAYER.AVAILABLE--;
       PURPLE_PLAYER.PLACED++;
     } else {
@@ -107,3 +95,22 @@ console.log("initializing game");
 startGame();
 
 console.log("turn: " + GAME_PROPERTIES.TURN);
+
+setUpClicks((e) => {
+  console.log(e);
+  let id = e.getAttribute("id");
+  let move = makeMoveProp(parseInt(id[0]), parseInt(id[1]), null, board);
+  if (GAME_PROPERTIES.TURN == PURPLE_TURN) {
+    move.TURN = PURPLE_TURN;
+    e.setAttribute("fill", SHARP_COLORS.PURPLE);
+    placeSoldier(move);
+    GAME_PROPERTIES.TURN = YELLOW_TURN;
+  } else if (GAME_PROPERTIES.TURN == YELLOW_TURN) {
+    move.TURN = YELLOW_TURN;
+    e.setAttribute("fill", SHARP_COLORS.YELLOW);
+    placeSoldier(move);
+    GAME_PROPERTIES.TURN = PURPLE_TURN;
+  } else {
+    throw RangeError("GAME_PROPERTIES.TURN not handled");
+  }
+});
