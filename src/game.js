@@ -131,8 +131,10 @@ function placeSoldier(move) {
 function removeSoldier(move) {
   if (algorithm.isRemovable(move)){
     if (move.COLOR == PURPLE_TURN){
+      PURPLE_PLAYER.AVAILABLE--;
       PURPLE_PLAYER.PLACED--;
     } else {
+      YELLOW_PLAYER.AVAILABLE--;
       YELLOW_PLAYER.PLACED--;
     }
     board[move.ROW][move.COL].COLOR = null;
