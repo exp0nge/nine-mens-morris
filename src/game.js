@@ -1,11 +1,6 @@
 import * as algorithm from './algorithm.js';
 
-const STATES = {
-  UNAVAILABLE: 0,
-  AVAILABLE: 1,
-  PURPLE: 2,
-  YELLOW: 3
-};
+const STATES = algorithm.STATES;
 
 const MOVE = {
   ROW: null,
@@ -54,20 +49,20 @@ function init() {
 
   board[3][3] = STATES.UNAVAILABLE;
 
-  board[4][1] = STATES.UNAVAILABLE;
-  board[4][2] = STATES.UNAVAILABLE;
-  board[4][4] = STATES.UNAVAILABLE;
-  board[4][5] = STATES.UNAVAILABLE;
+  board[6][1] = STATES.UNAVAILABLE;
+  board[6][2] = STATES.UNAVAILABLE;
+  board[6][4] = STATES.UNAVAILABLE;
+  board[6][5] = STATES.UNAVAILABLE;
 
   board[5][0] = STATES.UNAVAILABLE;
   board[5][2] = STATES.UNAVAILABLE;
   board[5][4] = STATES.UNAVAILABLE;
   board[5][6] = STATES.UNAVAILABLE;
 
-  board[6][0] = STATES.UNAVAILABLE;
-  board[6][1] = STATES.UNAVAILABLE;
-  board[6][5] = STATES.UNAVAILABLE;
-  board[6][6] = STATES.UNAVAILABLE;
+  board[4][0] = STATES.UNAVAILABLE;
+  board[4][1] = STATES.UNAVAILABLE;
+  board[4][5] = STATES.UNAVAILABLE;
+  board[4][6] = STATES.UNAVAILABLE;
 
 
 }
@@ -83,10 +78,19 @@ const GAME_PROPERTIES = {
 function startGame() {
   init();
   GAME_PROPERTIES.TURN = coinFlip();
+  printBoard();
+  phase1();
 }
 
 function printBoard() {
-
+    let stringBoard = "";
+    for (let i = 0; i < MATRIX_SIZE; i++) {
+      for (let j = 0; j < 7; j++) {
+          stringBoard += board[i][j];
+      }
+      stringBoard += "\n";
+    }
+    console.log(stringBoard);
 }
 
 function placeSoldier(move) {
@@ -99,6 +103,39 @@ function placeSoldier(move) {
       YELLOW_PLAYER.AVAILABLE--;
       YELLOW_PLAYER.PLACED++;
     }
+    return true;
+  } else {
+    return false;
+  }
+}
+
+function phase1() {
+  while (PURPLE_PLAYER.AVAILABLE > 0 || YELLOW_PLAYER.AVAILABLE > 0) {
+      if(GAME_PROPERTIES.TURN === YELLOW_TURN) {
+          var positions = prompt("Yellow: Enter a position to place the piece in the form of x,y");
+      } else {
+          var positions = prompt("Purple: Enter a position to place the piece in the form of x,y");
+      }
+      positions = positions.split(",");
+      var move = {
+          ROW: parseInt(positions[0], 10),
+          COL: parseInt(positions[1], 10),
+          COLOR: GAME_PROPERTIES.TURN ? STATES.YELLOW : STATES.PURPLE,
+          BOARD: board
+      };
+
+      if (placeSoldier(move)) {
+        // TODO: Check mills here
+        // if (algorithm.countNewMills(move) > 0) {
+        //   console.log("MILL");
+        // }
+
+        GAME_PROPERTIES.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
+      } else {
+        console.log("Invalid move");
+      }
+
+      printBoard();
   }
 }
 
@@ -106,4 +143,4 @@ console.log("initializing game");
 
 startGame();
 
-console.log("turn: " + GAME_PROPERTIES.TURN);
+export { STATES };

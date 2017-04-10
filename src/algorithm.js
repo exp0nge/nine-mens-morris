@@ -1,3 +1,10 @@
+const STATES = {
+  UNAVAILABLE: 0,
+  AVAILABLE: 1,
+  PURPLE: 2,
+  YELLOW: 3
+};
+
 const CENTER_POSITION = 3;
 
 function countNewMills(move){
@@ -56,4 +63,4 @@ function checkLose(player) {
   return false;
 }
 
-export { countNewMills, isValidMove, checkLose }
+export { STATES, countNewMills, isValidMove, checkLose };
