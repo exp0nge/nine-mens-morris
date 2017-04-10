@@ -1,3 +1,5 @@
+import { STATES } from './common.js';
+
 const CENTER_POSITION = 3;
 
 function countNewMills(move){
@@ -28,7 +30,7 @@ function checkMill(move, start, end, checkRow){
   var count = 0;
   for (let i = start; i <= end; i++){
     let pieceState = checkRow ? move.BOARD[move.ROW][i] : move.BOARD[i][move.COL];
-    if (pieceState === move.COLOR){
+    if (pieceState === move.TURN){
       count += 1;
     }
     if (count == 3){
