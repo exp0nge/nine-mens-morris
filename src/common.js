@@ -6,8 +6,8 @@ const SHARP_COLORS = {
 const STATES = {
   UNAVAILABLE: 0,
   AVAILABLE: 1,
-  PURPLE: 2,
-  YELLOW: 3
+  PURPLE: "P",
+  YELLOW: "Y"
 };
 
 const MOVE = {
