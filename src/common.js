@@ -14,14 +14,20 @@ const MOVE = {
   ROW: null,
   COL: null,
   COLOR: null,
-  BOARD: null
+  BOARD: null,
+  SHIFT: null,
+  SHIFTROW: null,
+  SHIFTCOL: null
 };
 
-function makeMoveProp(row, col, turn, board) {
+function makeMoveProp(row, col, turn, shift, shiftRow, shiftCol, board) {
   return {
     ROW: row,
     COL: col,
     TURN: turn,
+    SHIFT: shift,
+    SHIFTROW: shiftRow,
+    SHIFTCOL: shiftCol,
     BOARD: board
   }
 }

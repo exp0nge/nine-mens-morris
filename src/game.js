@@ -9,19 +9,21 @@ const TILE = {
   TURN: null
 }
 
+const PURPLE_PLAYER = {
+  AVAILABLE: 4,
+  PLACED: 0
+};
+
+const YELLOW_PLAYER = {
+  AVAILABLE: 4,
+  PLACED: 0
+};
+
+const PURPLE_TURN = 0;
+const YELLOW_TURN = 1;
+
 const MATRIX_SIZE = 7;
 const board = new Array(MATRIX_SIZE);
-const PURPLE_PLAYER = {
-  AVAILABLE: 9,
-  PLACED: 0
-}
-const YELLOW_PLAYER = {
-  AVAILABLE: 9,
-  PLACED: 0
-}
-var YELLOW_SOLDIERS_AVAILABLE = 9;
-var PURPLE_TURN = 0;
-var YELLOW_TURN = 1;
 
 function init() {
   for (let i = 0; i < MATRIX_SIZE; i++) {
@@ -77,11 +79,24 @@ const GAME_PROPERTIES = {
   TURN: null
 }
 
+function checkLose() {
+  if (PURPLE_PLAYER.PLACED < 3) return PURPLE_TURN;
+  if (YELLOW_PLAYER.PLACED < 3) return YELLOW_TURN;
+}
+
 function startGame() {
   init();
   GAME_PROPERTIES.TURN = coinFlip();
   printBoard();
+  console.log("Phase1");
   phase1();
+  console.log("Phase2");
+  phase2();
+  if (checkLose() === PURPLE_TURN) {
+    console.log("Yellow Wins");
+  } else {
+    console.log("Purple Wins");
+  }
 }
 
 function printBoard() {
@@ -112,6 +127,7 @@ function placeSoldier(move) {
     }
     return true;
   } else {
+    console.log("Algorithm: Not a valid move.")
     return false;
   }
 }
@@ -119,10 +135,8 @@ function placeSoldier(move) {
 function removeSoldier(move) {
   if (algorithm.isRemovable(move)){
     if (move.TURN == PURPLE_TURN){
-      PURPLE_PLAYER.AVAILABLE--;
       PURPLE_PLAYER.PLACED--;
     } else {
-      YELLOW_PLAYER.AVAILABLE--;
       YELLOW_PLAYER.PLACED--;
     }
     board[move.ROW][move.COL].TURN = null;
@@ -132,50 +146,102 @@ function removeSoldier(move) {
   }
 }
 
+function shiftSoldier(move) {
+  if (algorithm.isValidShift(move)) {
+    board[move.SHIFTROW][move.SHIFTCOL].TURN = move.TURN;
+    board[move.ROW][move.COL].TURN = null;
+    return true;
+  }
+
+  return false;
+}
+
+function handleNewMills(move) {
+  let numMills = algorithm.countNewMills(move);
+  while (numMills > 0) { // Made a mill
+    printBoard();
+    if(GAME_PROPERTIES.TURN === YELLOW_TURN) {
+      var positions = prompt("Yellow: Enter a position to remove a purple piece that is not a mill in the form of row,col");
+    } else {
+      var positions = prompt("Purple: Enter a position to remove a yellow piece that is not a mill in the form of row,col");
+    }
+    positions = positions.split(",");
+    move = {
+        ROW: parseInt(positions[0], 10),
+        COL: parseInt(positions[1], 10),
+        TURN: (GAME_PROPERTIES.TURN + 1) % 2,
+        BOARD: board
+    };
+    if(removeSoldier(move)) {
+      numMills--;
+    } else {
+      console.log("Invalid remove");
+    }
+  }
+}
 
 function phase1() {
   while (PURPLE_PLAYER.AVAILABLE > 0 || YELLOW_PLAYER.AVAILABLE > 0) {
       if(GAME_PROPERTIES.TURN === YELLOW_TURN) {
-        var positions = prompt("Yellow: Enter a position to place the piece in the form of x,y");
+        var positions = prompt("Yellow: Enter a position to place the piece in the form of row,col");
       } else {
-        var positions = prompt("Purple: Enter a position to place the piece in the form of x,y");      }
+        var positions = prompt("Purple: Enter a position to place the piece in the form of row,col");      }
       positions = positions.split(",");
-      var move = {
-          ROW: parseInt(positions[0], 10),
-          COL: parseInt(positions[1], 10),
-          TURN: GAME_PROPERTIES.TURN,
-          BOARD: board
-      };
+      console.log("Got " + positions);
+      var move = makeMoveProp(parseInt(positions[0], 10), 
+                              parseInt(positions[1], 10), 
+                              GAME_PROPERTIES.TURN, 
+                              null, null, null, 
+                              board);
 
       if (placeSoldier(move)) {
-        let numMills = algorithm.countNewMills(move);
-        while (numMills > 0) { // Made a mill
-          printBoard();
-          if(GAME_PROPERTIES.TURN === YELLOW_TURN) {
-            positions = prompt("Yellow: Enter a position to remove a purple piece that is not a mill in the form of x,y");
-          } else {
-            positions = prompt("Purple: Enter a position to remove a yellow piece that is not a mill in the form of x,y");
-          }
-          positions = positions.split(",");
-          move = {
-              ROW: parseInt(positions[0], 10),
-              COL: parseInt(positions[1], 10),
-              TURN: (GAME_PROPERTIES.TURN + 1) % 2,
-              BOARD: board
-          };
-          if(removeSoldier(move)) {
-            numMills--;
-          } else {
-            console.log("Invalid remove");
-          }
-        }
-
+        handleNewMills(move);
         GAME_PROPERTIES.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
       } else {
         console.log("Invalid place");
       }
 
       printBoard();
+  }
+}
+
+function phase2() {
+  while (PURPLE_PLAYER.PLACED > 2 && YELLOW_PLAYER.PLACED > 2) {
+    if(GAME_PROPERTIES.TURN === YELLOW_TURN) {
+      var positions = prompt("Yellow: Select position of your piece in the form of row,col");
+      var direction = prompt("Yellow: Enter 0(left), 1(right), 2(up), or 3(down)");
+    } else {
+      var positions = prompt("Purple: Select position of your piece in the form of row,col");
+      var direction = prompt("Purple: Enter 0(left), 1(right), 2(up), or 3(down)");
+    }
+    positions = positions.split(",");
+
+    // Set up move for shift
+    var move = makeMoveProp(parseInt(positions[0], 10), 
+                            parseInt(positions[1], 10), 
+                            GAME_PROPERTIES.TURN, 
+                            parseInt(direction, 10), 
+                            null, 
+                            null, 
+                            board);
+
+    if (move.BOARD[move.ROW][move.COL].TURN !== GAME_PROPERTIES.TURN) {
+      // Not your color
+      console.log("Invalid piece chosen");
+      continue;
+    }
+
+    if (shiftSoldier(move)) {
+      // Update row and col for handleNewMills
+      move.ROW = move.SHIFTROW;
+      move.COL = move.SHIFTCOL;
+      handleNewMills(move);
+      GAME_PROPERTIES.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
+    } else {
+      console.log("Invalid shift");
+    }
+
+    printBoard();
   }
 }
 
