@@ -79,6 +79,10 @@ const GAME_PROPERTIES = {
   TURN: null
 }
 
+function otherPlayer() {
+  return GAME_PROPERTIES.TURN != null ? (GAME_PROPERTIES.TURN + 1) % 2 : null;
+}
+
 function checkLose() {
   if (PURPLE_PLAYER.PLACED < 3) return PURPLE_TURN;
   if (YELLOW_PLAYER.PLACED < 3) return YELLOW_TURN;
@@ -255,28 +259,24 @@ console.log("turn: " + GAME_PROPERTIES.TURN);
 setUpClicks((e) => {
   console.log(e);
   let id = e.getAttribute("id");
-  let alert = document.getElementById("alertText");
+  let alertText = document.getElementById("alertText");
+  let alert = document.getElementById("alert");
   let move = makeMoveProp(parseInt(id[0]), parseInt(id[1]), null, null, null, null, board);
-  if (GAME_PROPERTIES.TURN == PURPLE_TURN) {
-    move.TURN = PURPLE_TURN;
+  if (GAME_PROPERTIES.TURN == PURPLE_TURN || GAME_PROPERTIES.TURN == YELLOW_TURN) {
+    move.TURN = GAME_PROPERTIES.TURN;
     if (placeSoldier(move)) {
-      e.setAttribute("fill", SHARP_COLORS.PURPLE);
-      GAME_PROPERTIES.TURN = YELLOW_TURN;
+      e.setAttribute("fill", SHARP_COLORS[GAME_PROPERTIES.TURN]);
+      GAME_PROPERTIES.TURN = otherPlayer();
     } else {
-      alert.innerHTML = ERRORS.invalidMove;
-    }
-  } else if (GAME_PROPERTIES.TURN == YELLOW_TURN) {
-    move.TURN = YELLOW_TURN;
-    if (placeSoldier(move)) {
-      e.setAttribute("fill", SHARP_COLORS.YELLOW);
-      GAME_PROPERTIES.TURN = PURPLE_TURN;
-    } else {
-      alert.innerHTML = ERRORS.invalidMove;
+      if (alert.style.display == "none"){
+        alert.style.display = "block";
+      }
+      alertText.innerHTML = ERRORS.invalidMove;
     }
   } else {
     throw RangeError("GAME_PROPERTIES.TURN not handled");
   }
   setTimeout(function() {
-    document.getElementById("alert").style.display = "none";
-  }, 2000);
+    alert.style.display = "none";
+  }, 5000);
 });
