@@ -32,4 +32,13 @@ function makeMoveProp(row, col, turn, shift, shiftRow, shiftCol, board) {
   }
 }
 
-export { SHARP_COLORS, STATES, makeMoveProp };
+const ERRORS = {
+  invalidMove: "Invalid move"
+}
+
+const DIALOG = {
+  purpleTurn: "Purple's turn",
+  yellowTurn: "Yellow's turn"
+}
+
+export { SHARP_COLORS, STATES, makeMoveProp, ERRORS, DIALOG };

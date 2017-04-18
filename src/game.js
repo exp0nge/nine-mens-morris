@@ -1,6 +1,6 @@
 import * as algorithm from './algorithm.js';
 import { setUpClicks } from './events.js';
-import { SHARP_COLORS, STATES, makeMoveProp } from './common.js';
+import { SHARP_COLORS, STATES, makeMoveProp, ERRORS, DIALOG } from './common.js';
 
 // Structs
 const TILE = {
@@ -89,9 +89,9 @@ function startGame() {
   GAME_PROPERTIES.TURN = coinFlip();
   printBoard();
   console.log("Phase1");
-  phase1();
+  // phase1();
   console.log("Phase2");
-  phase2();
+  // phase2();
   if (checkLose() === PURPLE_TURN) {
     console.log("Yellow Wins");
   } else {
@@ -174,6 +174,7 @@ function handleNewMills(move) {
     };
     if(removeSoldier(move)) {
       numMills--;
+      return true;
     } else {
       console.log("Invalid remove");
     }
@@ -254,18 +255,28 @@ console.log("turn: " + GAME_PROPERTIES.TURN);
 setUpClicks((e) => {
   console.log(e);
   let id = e.getAttribute("id");
-  let move = makeMoveProp(parseInt(id[0]), parseInt(id[1]), null, board);
+  let alert = document.getElementById("alertText");
+  let move = makeMoveProp(parseInt(id[0]), parseInt(id[1]), null, null, null, null, board);
   if (GAME_PROPERTIES.TURN == PURPLE_TURN) {
     move.TURN = PURPLE_TURN;
-    e.setAttribute("fill", SHARP_COLORS.PURPLE);
-    placeSoldier(move);
-    GAME_PROPERTIES.TURN = YELLOW_TURN;
+    if (placeSoldier(move)) {
+      e.setAttribute("fill", SHARP_COLORS.PURPLE);
+      GAME_PROPERTIES.TURN = YELLOW_TURN;
+    } else {
+      alert.innerHTML = ERRORS.invalidMove;
+    }
   } else if (GAME_PROPERTIES.TURN == YELLOW_TURN) {
     move.TURN = YELLOW_TURN;
-    e.setAttribute("fill", SHARP_COLORS.YELLOW);
-    placeSoldier(move);
-    GAME_PROPERTIES.TURN = PURPLE_TURN;
+    if (placeSoldier(move)) {
+      e.setAttribute("fill", SHARP_COLORS.YELLOW);
+      GAME_PROPERTIES.TURN = PURPLE_TURN;
+    } else {
+      alert.innerHTML = ERRORS.invalidMove;
+    }
   } else {
     throw RangeError("GAME_PROPERTIES.TURN not handled");
   }
+  setTimeout(function() {
+    document.getElementById("alert").style.display = "none";
+  }, 2000);
 });

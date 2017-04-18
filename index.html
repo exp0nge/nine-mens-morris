@@ -5,15 +5,25 @@
     <title>Nine Mens Morris</title>
   </head>
   <style media="screen">
-    #board-container {
+    #board-container
+    #alert
+    {
       width: 400px;
       height: 400px;
       margin: auto;
+    }
+    #alert {
+      color: white;
+      background: red;
+      text-align: center;
     }
   </style>
   <body>
   <div id="board-container">
     <object id="board" data="./public/board.svg" type="image/svg+xml"></object>
+  </div>
+  <div id="alert">
+    <p id="alertText"></p>
   </div>
   <script src="./lib/main-bundle.js" charset="utf-8"></script>
   </body>
