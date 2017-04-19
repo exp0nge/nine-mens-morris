@@ -79,7 +79,8 @@ const GAME_PROPERTIES = {
     TURN: null,
     CAPTURING: false,
     MILLS: 0,
-    PHASE: 1
+    PHASE: 1,
+    SOURCE: null
 }
 
 function otherPlayer() {
@@ -112,6 +113,17 @@ function setCaptureText() {
         turnPromptText.innerHTML = "Click on a YELLOW piece to capture it (that's not a mill)";
     } else if (GAME_PROPERTIES.TURN == 1) {
         turnPromptText.innerHTML = "Click on a PURPLE piece to capture it (that's not a mill)";
+    } else {
+        throw new TypeError("GAME_PROPERTIES.TURN invalid, expected 0 or 1 got " + String(GAME_PROPERTIES.TURN));
+    }
+}
+
+function setMoveText() {
+    turnPromptText.style.display = "block";
+    if (GAME_PROPERTIES.TURN == 0) {
+        turnPromptText.innerHTML = "Click on a PURPLE piece and a destination spot";
+    } else if (GAME_PROPERTIES.TURN == 1) {
+        turnPromptText.innerHTML = "Click on a YELLOW piece and a destination spot";
     } else {
         throw new TypeError("GAME_PROPERTIES.TURN invalid, expected 0 or 1 got " + String(GAME_PROPERTIES.TURN));
     }
@@ -322,7 +334,16 @@ function phaseOneHandler(e) {
 }
 
 function phaseTwoHandler(e) {
-    // TODO
+    if (GAME_PROPERTIES.SOURCE == null) {
+        GAME_PROPERTIES.SOURCE = e;
+
+        return;
+    }
+
+    // at this point SOURCE is filled and we have id as destination
+    GAME_PROPERTIES.SOURCE.setAttribute(SHARP_COLORS["default"]);
+    e.setAttribute(SHARP_COLORS[GAME_PROPERTIES.TURN]);
+    GAME_PROPERTIES.SOURCE = null;
 }
 
 setUpClicks((e) => {
