@@ -10,12 +10,12 @@ const TILE = {
 }
 
 const PURPLE_PLAYER = {
-    AVAILABLE: 4,
+    AVAILABLE: 2,
     PLACED: 0
 };
 
 const YELLOW_PLAYER = {
-    AVAILABLE: 4,
+    AVAILABLE: 2,
     PLACED: 0
 };
 
@@ -334,9 +334,17 @@ function phaseOneHandler(e) {
 }
 
 function phaseTwoHandler(e) {
+    let eId = e.getAttribute("id");
+    let row = parseInt(eId[0]);
+    let col = parseInt(eId[1]);
+    let tileState = board[row][col];
+    if (tileState.TURN != GAME_PROPERTIES.TURN) {
+        invalidMoveAlert();
+        return;
+    }
+
     if (GAME_PROPERTIES.SOURCE === null) {
         GAME_PROPERTIES.SOURCE = e;
-
         return;
     }
 
@@ -344,6 +352,8 @@ function phaseTwoHandler(e) {
     GAME_PROPERTIES.SOURCE.setAttribute("fill", SHARP_COLORS["default"]);
     e.setAttribute("fill", SHARP_COLORS[GAME_PROPERTIES.TURN]);
     GAME_PROPERTIES.SOURCE = null;
+    GAME_PROPERTIES.TURN = otherPlayer();
+    setTurnText();
 }
 
 setUpClicks((e) => {
