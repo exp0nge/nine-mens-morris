@@ -1,36 +1,39 @@
 <!DOCTYPE html>
 <html>
-  <head>
+
+<head>
     <meta charset="utf-8">
     <title>Nine Mens Morris</title>
-  </head>
-  <style media="screen">
-    #board-container
-    {
-      width: 400px;
-      height: 400px;
-      margin: auto;
+</head>
+<style media="screen">
+    #board-container {
+        width: 400px;
+        height: 400px;
+        margin: auto;
     }
+    
     #alert {
-      margin: auto;
-      color: white;
-      background: red;
-      text-align: center;
+        margin: auto;
+        color: white;
+        background: red;
+        text-align: center;
     }
-  </style>
-  <body>
-  <div id="phase">
-    <h2 id="phaseText">Phase 1: Place and capture pieces</h2>
-  </div>
-  <div id="turn">
-    <h3 id="turnText"></h3>
-  </div>
-  <div id="board-container">
-    <object id="board" data="./public/board.svg" type="image/svg+xml"></object>
-  </div>
-  <div id="alert">
-    <p id="alertText"></p>
-  </div>
-  <script src="./lib/main-bundle.js" charset="utf-8"></script>
-  </body>
+</style>
+
+<body>
+    <div id="phase">
+        <h2 id="phaseText">Phase 1: Place and capture pieces</h2>
+    </div>
+    <div id="turn">
+        <h3 id="turnText"></h3> <span id="turnPromptText"></span>
+    </div>
+    <div id="board-container">
+        <object id="board" data="./public/board.svg" type="image/svg+xml"></object>
+    </div>
+    <div id="alert">
+        <p id="alertText"></p>
+    </div>
+    <script src="./lib/main-bundle.js" charset="utf-8"></script>
+</body>
+
 </html>
