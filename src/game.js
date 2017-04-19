@@ -334,15 +334,15 @@ function phaseOneHandler(e) {
 }
 
 function phaseTwoHandler(e) {
-    if (GAME_PROPERTIES.SOURCE == null) {
+    if (GAME_PROPERTIES.SOURCE === null) {
         GAME_PROPERTIES.SOURCE = e;
 
         return;
     }
 
     // at this point SOURCE is filled and we have id as destination
-    GAME_PROPERTIES.SOURCE.setAttribute(SHARP_COLORS["default"]);
-    e.setAttribute(SHARP_COLORS[GAME_PROPERTIES.TURN]);
+    GAME_PROPERTIES.SOURCE.setAttribute("fill", SHARP_COLORS["default"]);
+    e.setAttribute("fill", SHARP_COLORS[GAME_PROPERTIES.TURN]);
     GAME_PROPERTIES.SOURCE = null;
 }
 
