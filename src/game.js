@@ -321,9 +321,14 @@ function phaseOneHandler(e) {
     setTurnText();
 }
 
+function phaseTwoHandler(e) {
+    // TODO
+}
 
 setUpClicks((e) => {
     if (GAME_PROPERTIES.PHASE === 1 || GAME_PROPERTIES.MILLS > 0) {
         phaseOneHandler(e);
+    } else if (GAME_PROPERTIES.PHASE == 2) {
+        phaseTwoHandler(e);
     }
 });
