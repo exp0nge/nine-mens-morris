@@ -1,6 +1,10 @@
 import * as algorithm from './algorithm.js';
+<<<<<<< HEAD
 import { setUpClicks } from './events.js';
-import { SHARP_COLORS, STATES, makeMoveProp, ERRORS, DIALOG, PURPLE_PLAYER, YELLOW_PLAYER, PURPLE_TURN, YELLOW_TURN } from './common.js';
+import { SHARP_COLORS, STATES, makeMoveProp, ERRORS, DIALOG } from './common.js';
+=======
+import { PURPLE_PLAYER, YELLOW_PLAYER, PURPLE_TURN, YELLOW_TURN } from './constants.js'
+>>>>>>> 5bcc321... Check for mill capture if no other options available
 
 // Structs
 const TILE = {
@@ -8,9 +12,6 @@ const TILE = {
   ISMILL: false,
   TURN: null
 }
-
-console.log(PURPLE_TURN);
-console.log(YELLOW_TURN);
 
 const MATRIX_SIZE = 7;
 const board = new Array(MATRIX_SIZE);
@@ -89,8 +90,6 @@ function setTurnText() {
 }
 
 function startGame() {
-  console.log(PURPLE_TURN);
-  console.log(YELLOW_TURN);
   init();
   GAME_PROPERTIES.TURN = coinFlip();
   setTurnText();
@@ -139,19 +138,29 @@ function placeSoldier(move) {
 }
 
 function removeSoldier(move) {
+<<<<<<< HEAD
+  if (algorithm.isRemovable(move)){
+    if (move.TURN == PURPLE_TURN){
+      PURPLE_PLAYER.PLACED--;
+    } else {
+      YELLOW_PLAYER.PLACED--;
+    }
+    board[move.ROW][move.COL].TURN = null;
+=======
   // When removing, we remove the piece with that color
-  let removingPiece = (move.TURN === PURPLE_TURN) ? PURPLE_PLAYER : YELLOW_PLAYER;
+  let removingPiece = (move.COLOR === PURPLE_TURN) ? PURPLE_PLAYER : YELLOW_PLAYER;
   if (!algorithm.isRemovable(move)){
     return false;
   }
 
   if (!board[move.ROW][move.COL].ISMILL){ // not a mill
-    board[move.ROW][move.COL].TURN = null;
+    board[move.ROW][move.COL].COLOR = null;
     removingPiece.PLACED--;
+>>>>>>> 5bcc321... Check for mill capture if no other options available
     return true;
   } else { // is a mill
     if (removingPiece.PLACED - removingPiece.MILLPIECES == 0) { // Removing from mill is possible if only mills are left
-      board[move.ROW][move.COL].TURN = null;
+      board[move.ROW][move.COL].COLOR = null;
       board[move.ROW][move.COL].ISMILL = false;
       removingPiece.PLACED--;
       removingPiece.MILLPIECES--;
@@ -163,10 +172,14 @@ function removeSoldier(move) {
 
 function shiftSoldier(move) {
   if (algorithm.isValidShift(move)) {
-    // reset state of current
+<<<<<<< HEAD
+    board[move.SHIFTROW][move.SHIFTCOL].TURN = move.TURN;
     board[move.ROW][move.COL].TURN = null;
+=======
+    // reset state of current
+    board[move.ROW][move.COL].COLOR = null;
     if (board[move.ROW][move.COL].ISMILL === true) {
-      if (move.TURN === PURPLE_TURN){
+      if (move.COLOR === PURPLE_TURN){
         PURPLE_PLAYER.MILLPIECES--;
       } else {
         YELLOW_PLAYER.MILLPIECES--;
@@ -175,7 +188,8 @@ function shiftSoldier(move) {
     };
 
     // update color of new
-    board[move.SHIFTROW][move.SHIFTCOL].TURN = move.TURN;
+    board[move.SHIFTROW][move.SHIFTCOL].COLOR = move.COLOR;
+>>>>>>> 5bcc321... Check for mill capture if no other options available
     return true;
   }
 
@@ -184,24 +198,45 @@ function shiftSoldier(move) {
 
 function handleNewMills(move, originalHandler) {
   let numMills = algorithm.countNewMills(move);
+
   printBoard();
   if (numMills > 0) { // Made a mill
     printBoard();
+<<<<<<< HEAD
+    if (GAME_PROPERTIES.TURN === YELLOW_TURN) {
+      alertText.innerHTML = "Click on a PURPLE piece to remove that is not a mill";
+=======
     var message = "";
     if(GAME_PROPERTIES.TURN === YELLOW_TURN) {
-      message = "Click on a PURPLE piece to remove";
+      message = "Yellow: Enter a position to remove a purple piece in the form of row,col";
     } else {
-      message = "Click on a YELLOW piece to remove";
+      message = "Purple: Enter a position to remove a yellow piece in the form of row,col"
     }
 
     let removingPiece = (((GAME_PROPERTIES.TURN + 1) % 2) === PURPLE_TURN) ? PURPLE_PLAYER : YELLOW_PLAYER;
+    console.log(removingPiece.PLACED);
+    console.log(removingPiece.MILLPIECES);
     if (removingPiece.PLACED - removingPiece.MILLPIECES == 0) { // Removing from mill is possible if only mills are left
       message += " that is a mill";
     } else {
       message += " that is not a mill";
     }
 
-    alertText.innerHTML = message;
+    var positions = prompt(message);
+    positions = positions.split(",");
+    move = {
+        ROW: parseInt(positions[0], 10),
+        COL: parseInt(positions[1], 10),
+        COLOR: (GAME_PROPERTIES.TURN + 1) % 2,
+        BOARD: board
+    };
+    if(removeSoldier(move)) {
+      numMills--;
+>>>>>>> 5bcc321... Check for mill capture if no other options available
+    } else {
+      alertText.innerHTML = "Click on a YELLOW piece to remove that is not a mill";
+    }
+
     // tell originalHandler
     GAME_PROPERTIES.CAPTURING = true;
     GAME_PROPERTIES.MILLS = numMills;
@@ -226,12 +261,12 @@ function phase2() {
     positions = positions.split(",");
 
     // Set up move for shift
-    var move = makeMoveProp(parseInt(positions[0], 10),
-                            parseInt(positions[1], 10),
-                            GAME_PROPERTIES.TURN,
-                            parseInt(direction, 10),
-                            null,
-                            null,
+    var move = makeMoveProp(parseInt(positions[0], 10), 
+                            parseInt(positions[1], 10), 
+                            GAME_PROPERTIES.TURN, 
+                            parseInt(direction, 10), 
+                            null, 
+                            null, 
                             board);
 
     if (move.BOARD[move.ROW][move.COL].TURN !== GAME_PROPERTIES.TURN) {
@@ -279,10 +314,6 @@ function invalidMoveAlert() {
 function clickHandler(e) {
   let id = e.getAttribute("id");
   let move = makeMoveProp(parseInt(id[0]), parseInt(id[1]), null, null, null, null, board);
-  console.log(GAME_PROPERTIES);
-  console.log(PURPLE_TURN);
-  console.log(YELLOW_TURN);
-
   if (GAME_PROPERTIES.TURN == PURPLE_TURN || GAME_PROPERTIES.TURN == YELLOW_TURN) {
     move.TURN = GAME_PROPERTIES.TURN;
     // phase 1
@@ -293,13 +324,13 @@ function clickHandler(e) {
       if (removeSoldier(move)) {
         e.setAttribute("fill", SHARP_COLORS['default']);
         GAME_PROPERTIES.MILLS -= 1;
-        if (GAME_PROPERTIES.MILLS == 0) {
+        if (GAME_PROPERTIES.MILL == 0) {
           GAME_PROPERTIES.MILLS = 0;
           GAME_PROPERTIES.CAPTURING = false;
         } else {
           GAME_PROPERTIES.TURN = otherPlayer();
           setTurnText();
-
+          
           clearAlert();
         }
       } else {
@@ -307,7 +338,7 @@ function clickHandler(e) {
       }
       // abort
       return;
-    }
+    } 
     ////////////////////////////////////////////////////////////////
     if (placeSoldier(move)) {
       e.setAttribute("fill", SHARP_COLORS[GAME_PROPERTIES.TURN]);
@@ -320,7 +351,7 @@ function clickHandler(e) {
       invalidMoveAlert();
     }
   } else {
-    throw new RangeError("GAME_PROPERTIES.TURN not handled");
+    throw RangeError("GAME_PROPERTIES.TURN not handled");
   }
 
   console.log(PURPLE_PLAYER);

@@ -42,4 +42,19 @@ const DIALOG = {
   yellowTurn: "Yellow's turn"
 }
 
-export { SHARP_COLORS, STATES, makeMoveProp, ERRORS, DIALOG };
+const PURPLE_PLAYER = {
+  AVAILABLE: 4,
+  PLACED: 0,
+  MILLPIECES: 0
+};
+
+const YELLOW_PLAYER = {
+  AVAILABLE: 3,
+  PLACED: 0,
+  MILLPIECES: 0
+};
+
+const PURPLE_TURN = 0;
+const YELLOW_TURN = 1;
+
+export { SHARP_COLORS, STATES, makeMoveProp, ERRORS, DIALOG, PURPLE_PLAYER, YELLOW_PLAYER, PURPLE_TURN, YELLOW_TURN };

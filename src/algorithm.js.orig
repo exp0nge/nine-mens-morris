@@ -1,4 +1,8 @@
-import { STATES, PURPLE_PLAYER, YELLOW_PLAYER, PURPLE_TURN, YELLOW_TURN } from './common.js'
+<<<<<<< HEAD
+import { STATES } from './common.js';
+=======
+import { PURPLE_PLAYER, YELLOW_PLAYER, PURPLE_TURN, YELLOW_TURN } from './constants.js'
+>>>>>>> 5bcc321... Check for mill capture if no other options available
 
 const CENTER_POSITION = 3;
 
@@ -30,7 +34,11 @@ function checkMill(move, start, end, checkRow){
   let count = 0;
   for (let i = start; i <= end; i++){
     let tileState = checkRow ? move.BOARD[move.ROW][i] : move.BOARD[i][move.COL];
-    if (tileState.ISAVAILABLE === true && tileState.TURN === move.TURN){
+<<<<<<< HEAD
+    if (tileState.TURN === move.TURN){
+=======
+    if (tileState.ISAVAILABLE === true && tileState.COLOR === move.COLOR){
+>>>>>>> 5bcc321... Check for mill capture if no other options available
       count += 1;
     }
   }
@@ -38,11 +46,15 @@ function checkMill(move, start, end, checkRow){
     // change ISMILL to true
     for (let i = start; i <= end; i++){
       let tileState = checkRow ? move.BOARD[move.ROW][i] : move.BOARD[i][move.COL];
+<<<<<<< HEAD
+      if (tileState.TURN === move.TURN){
+=======
       if (tileState.ISAVAILABLE === true && tileState.ISMILL === false){
+>>>>>>> 5bcc321... Check for mill capture if no other options available
         tileState.ISMILL = true;
-        if (move.TURN === YELLOW_TURN) {
+        if (move.COLOR === YELLOW_TURN) {
           YELLOW_PLAYER.MILLPIECES += 1;
-        } else if (move.TURN === PURPLE_TURN) {
+        } else if (move.COLOR === PURPLE_TURN) {
           PURPLE_PLAYER.MILLPIECES += 1;
         }
       }
@@ -61,7 +73,11 @@ function isValidMove(move) {
 function isRemovable(move) {
   // Is not part of a mill and has a piece
   let tileState = move.BOARD[move.ROW][move.COL];
-  return (tileState.ISAVAILABLE && tileState.TURN === move.TURN);
+<<<<<<< HEAD
+  return (tileState.ISAVAILABLE && tileState.TURN === move.TURN && !tileState.ISMILL);
+=======
+  return (tileState.ISAVAILABLE && tileState.COLOR === move.COLOR);
+>>>>>>> 5bcc321... Check for mill capture if no other options available
 }
 
 /**
