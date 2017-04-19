@@ -1,6 +1,7 @@
 const SHARP_COLORS = {
   0: '#ff00ee', // purple
-  1: '#f6ff00' // yellow
+  1: '#f6ff00', // yellow
+  default: '#000000'
 }
 
 const STATES = {

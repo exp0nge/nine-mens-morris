@@ -4,6 +4,7 @@ function setUpClicks(clickHandler) {
     let dots = svg.getElementsByTagName('ellipse');
     for (var i = 0; i < dots.length; i++) {
       if (dots[i] != null) {
+        dots[i].removeEventListener("click", clickHandler);
         dots[i].addEventListener("click", (e) => {
           clickHandler(e.target);
         });

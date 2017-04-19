@@ -76,7 +76,9 @@ function coinFlip() {
 }
 
 const GAME_PROPERTIES = {
-  TURN: null
+  TURN: null,
+  CAPTURING: false,
+  MILLS: 0
 }
 
 function otherPlayer() {
@@ -88,19 +90,27 @@ function checkLose() {
   if (YELLOW_PLAYER.PLACED < 3) return YELLOW_TURN;
 }
 
+const alertText = document.getElementById("alertText");
+const alert = document.getElementById("alert");
+const turnText = document.getElementById("turnText");
+
+function setTurnText() {
+  turnText.innerHTML = GAME_PROPERTIES.TURN ? "YELLOW (1)" : "PURPLE (0)";
+}
+
 function startGame() {
   init();
   GAME_PROPERTIES.TURN = coinFlip();
+  setTurnText();
+  console.log(PURPLE_PLAYER);
+  console.log(YELLOW_PLAYER);
   printBoard();
-  console.log("Phase1");
-  // phase1();
-  console.log("Phase2");
   // phase2();
-  if (checkLose() === PURPLE_TURN) {
-    console.log("Yellow Wins");
-  } else {
-    console.log("Purple Wins");
-  }
+  // if (checkLose() === PURPLE_TURN) {
+  //   console.log("Yellow Wins");
+  // } else {
+  //   console.log("Purple Wins");
+  // }
 }
 
 function printBoard() {
@@ -109,7 +119,7 @@ function printBoard() {
       for (let j = 0; j < 7; j++) {
         let tileState = board[i][j];
         let stringState = tileState.ISAVAILABLE ? STATES.AVAILABLE : STATES.UNAVAILABLE;
-        if (tileState.TURN !== null) {
+        if (tileState.TURN !== null && tileState.TURN !== undefined) {
           stringState = tileState.TURN ? STATES.YELLOW : STATES.PURPLE;
         }
         stringBoard += stringState;
@@ -121,7 +131,7 @@ function printBoard() {
 
 function placeSoldier(move) {
   if (algorithm.isValidMove(move)){
-    board[move.ROW][move.COL] = move.TURN;
+    board[move.ROW][move.COL].TURN = move.TURN;
     if (move.TURN === PURPLE_TURN){
       PURPLE_PLAYER.AVAILABLE--;
       PURPLE_PLAYER.PLACED++;
@@ -160,53 +170,27 @@ function shiftSoldier(move) {
   return false;
 }
 
-function handleNewMills(move) {
+function handleNewMills(move, originalHandler) {
   let numMills = algorithm.countNewMills(move);
-  while (numMills > 0) { // Made a mill
+
+  printBoard();
+  if (numMills > 0) { // Made a mill
     printBoard();
-    if(GAME_PROPERTIES.TURN === YELLOW_TURN) {
-      var positions = prompt("Yellow: Enter a position to remove a purple piece that is not a mill in the form of row,col");
+    if (GAME_PROPERTIES.TURN === YELLOW_TURN) {
+      alertText.innerHTML = "Click on a PURPLE piece to remove that is not a mill";
     } else {
-      var positions = prompt("Purple: Enter a position to remove a yellow piece that is not a mill in the form of row,col");
+      alertText.innerHTML = "Click on a YELLOW piece to remove that is not a mill";
     }
-    positions = positions.split(",");
-    move = {
-        ROW: parseInt(positions[0], 10),
-        COL: parseInt(positions[1], 10),
-        TURN: (GAME_PROPERTIES.TURN + 1) % 2,
-        BOARD: board
-    };
-    if(removeSoldier(move)) {
-      numMills--;
-      return true;
-    } else {
-      console.log("Invalid remove");
-    }
-  }
-}
 
-function phase1() {
-  while (PURPLE_PLAYER.AVAILABLE > 0 || YELLOW_PLAYER.AVAILABLE > 0) {
-      if(GAME_PROPERTIES.TURN === YELLOW_TURN) {
-        var positions = prompt("Yellow: Enter a position to place the piece in the form of row,col");
-      } else {
-        var positions = prompt("Purple: Enter a position to place the piece in the form of row,col");      }
-      positions = positions.split(",");
-      console.log("Got " + positions);
-      var move = makeMoveProp(parseInt(positions[0], 10), 
-                              parseInt(positions[1], 10), 
-                              GAME_PROPERTIES.TURN, 
-                              null, null, null, 
-                              board);
+    // tell originalHandler
+    GAME_PROPERTIES.CAPTURING = true;
+    GAME_PROPERTIES.MILLS = numMills;
 
-      if (placeSoldier(move)) {
-        handleNewMills(move);
-        GAME_PROPERTIES.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
-      } else {
-        console.log("Invalid place");
-      }
-
-      printBoard();
+    // don't switch turns
+    return false;
+  } else {
+    // consume turn
+    return false;
   }
 }
 
@@ -256,27 +240,78 @@ startGame();
 
 console.log("turn: " + GAME_PROPERTIES.TURN);
 
-setUpClicks((e) => {
-  console.log(e);
+function clearAlert() {
+  if (alert.style.display != "none")
+      alert.style.display = "none";
+}
+
+function invalidMoveAlert() {
+  console.log("TURN: " + GAME_PROPERTIES.TURN);
+  if (alert.style.display == "none"){
+    alert.style.display = "block";
+  }
+  alertText.innerHTML = ERRORS.invalidMove;
+  setTimeout(function() {
+    clearAlert();
+  }, 5000);
+}
+
+function clickHandler(e) {
   let id = e.getAttribute("id");
-  let alertText = document.getElementById("alertText");
-  let alert = document.getElementById("alert");
   let move = makeMoveProp(parseInt(id[0]), parseInt(id[1]), null, null, null, null, board);
   if (GAME_PROPERTIES.TURN == PURPLE_TURN || GAME_PROPERTIES.TURN == YELLOW_TURN) {
     move.TURN = GAME_PROPERTIES.TURN;
+    // phase 1
+    ////////////////////////////////////////////////////////////////
+    if (GAME_PROPERTIES.CAPTURING && GAME_PROPERTIES.MILLS > 0) {
+      console.log("CAPTURING");
+      move.TURN = otherPlayer();
+      if (removeSoldier(move)) {
+        e.setAttribute("fill", SHARP_COLORS['default']);
+        GAME_PROPERTIES.MILLS -= 1;
+        if (GAME_PROPERTIES.MILL == 0) {
+          GAME_PROPERTIES.MILLS = 0;
+          GAME_PROPERTIES.CAPTURING = false;
+        } else {
+          GAME_PROPERTIES.TURN = otherPlayer();
+          setTurnText();
+          
+          clearAlert();
+        }
+      } else {
+        invalidMoveAlert();
+      }
+      // abort
+      return;
+    } 
+    ////////////////////////////////////////////////////////////////
     if (placeSoldier(move)) {
       e.setAttribute("fill", SHARP_COLORS[GAME_PROPERTIES.TURN]);
-      GAME_PROPERTIES.TURN = otherPlayer();
-    } else {
-      if (alert.style.display == "none"){
-        alert.style.display = "block";
+      console.log(algorithm.countNewMills(move));
+      handleNewMills(move, clickHandler);
+      if (algorithm.countNewMills(move) === 0) {
+        GAME_PROPERTIES.TURN = otherPlayer();
       }
-      alertText.innerHTML = ERRORS.invalidMove;
+    } else {
+      invalidMoveAlert();
     }
   } else {
     throw RangeError("GAME_PROPERTIES.TURN not handled");
   }
-  setTimeout(function() {
-    alert.style.display = "none";
-  }, 5000);
-});
+
+  console.log(PURPLE_PLAYER);
+  console.log(YELLOW_PLAYER);
+
+  if (PURPLE_PLAYER.AVAILABLE === 0 && YELLOW_PLAYER.AVAILABLE === 0) {
+    // phase 1 end
+    console.log("------------ PHASE 1 COMPLETE ------------");
+  } else if (PURPLE_PLAYER.AVAILABLE == 0) {
+    GAME_PROPERTIES.TURN = YELLOW_TURN;
+  } else if (YELLOW_PLAYER.AVAILABLE == 0) {
+    GAME_PROPERTIES.TURN = PURPLE_TURN;
+  }
+  setTurnText();
+}
+
+
+setUpClicks((e) => clickHandler(e));

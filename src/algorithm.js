@@ -27,7 +27,7 @@ function countNewMills(move){
 }
 
 function checkMill(move, start, end, checkRow){
-  var count = 0;
+  let count = 0;
   for (let i = start; i <= end; i++){
     let tileState = checkRow ? move.BOARD[move.ROW][i] : move.BOARD[i][move.COL];
     if (tileState.TURN === move.TURN){
@@ -50,7 +50,6 @@ function checkMill(move, start, end, checkRow){
 
 function isValidMove(move) {
   let tileState = move.BOARD[move.ROW][move.COL];
-  console.log(tileState);
   return (tileState.ISAVAILABLE && tileState.TURN === null);
 }
 

@@ -6,19 +6,25 @@
   </head>
   <style media="screen">
     #board-container
-    #alert
     {
       width: 400px;
       height: 400px;
       margin: auto;
     }
     #alert {
+      margin: auto;
       color: white;
       background: red;
       text-align: center;
     }
   </style>
   <body>
+  <div id="phase">
+    <h2 id="phaseText">Phase 1: Place and capture pieces</h2>
+  </div>
+  <div id="turn">
+    <h3 id="turnText"></h3>
+  </div>
   <div id="board-container">
     <object id="board" data="./public/board.svg" type="image/svg+xml"></object>
   </div>
