@@ -78,7 +78,8 @@ function coinFlip() {
 const GAME_PROPERTIES = {
   TURN: null,
   CAPTURING: false,
-  MILLS: 0
+  MILLS: 0,
+  PHASE: 1
 }
 
 function otherPlayer() {
@@ -256,7 +257,7 @@ function invalidMoveAlert() {
   }, 5000);
 }
 
-function clickHandler(e) {
+function phaseOneHandler(e) {
   let id = e.getAttribute("id");
   let move = makeMoveProp(parseInt(id[0]), parseInt(id[1]), null, null, null, null, board);
   if (GAME_PROPERTIES.TURN == PURPLE_TURN || GAME_PROPERTIES.TURN == YELLOW_TURN) {
@@ -288,7 +289,7 @@ function clickHandler(e) {
     if (placeSoldier(move)) {
       e.setAttribute("fill", SHARP_COLORS[GAME_PROPERTIES.TURN]);
       console.log(algorithm.countNewMills(move));
-      handleNewMills(move, clickHandler);
+      handleNewMills(move, phaseOneHandler);
       if (algorithm.countNewMills(move) === 0) {
         GAME_PROPERTIES.TURN = otherPlayer();
       }
@@ -305,6 +306,7 @@ function clickHandler(e) {
   if (PURPLE_PLAYER.AVAILABLE === 0 && YELLOW_PLAYER.AVAILABLE === 0) {
     // phase 1 end
     console.log("------------ PHASE 1 COMPLETE ------------");
+    document.getElementById("phaseText").innerHTML = "Phase 2: Move and capture";
   } else if (PURPLE_PLAYER.AVAILABLE == 0) {
     GAME_PROPERTIES.TURN = YELLOW_TURN;
   } else if (YELLOW_PLAYER.AVAILABLE == 0) {
@@ -314,4 +316,8 @@ function clickHandler(e) {
 }
 
 
-setUpClicks((e) => clickHandler(e));
+setUpClicks((e) => {
+  if (GAME_PROPERTIES.PHASE === 1){
+    phaseOneHandler(e);
+  }
+});
