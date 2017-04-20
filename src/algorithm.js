@@ -1,4 +1,4 @@
-import { STATES } from './common.js';
+import { STATES, PURPLE_PLAYER, YELLOW_PLAYER, PURPLE_TURN, YELLOW_TURN } from './common.js'
 
 const CENTER_POSITION = 3;
 
@@ -30,22 +30,27 @@ function checkMill(move, start, end, checkRow) {
     let count = 0;
     for (let i = start; i <= end; i++) {
         let tileState = checkRow ? move.BOARD[move.ROW][i] : move.BOARD[i][move.COL];
-        if (tileState.TURN === move.TURN) {
+        if (tileState.ISAVAILABLE === true && tileState.TURN === move.TURN) {
             count += 1;
         }
     }
-    if (count == 3) {
-        // change ISMILL to true
-        for (let i = start; i <= end; i++) {
-            let tileState = checkRow ? move.BOARD[move.ROW][i] : move.BOARD[i][move.COL];
-            if (tileState.TURN === move.TURN) {
-                tileState.ISMILL = true;
-            }
+  if (count === 3){
+    // change ISMILL to true
+    for (let i = start; i <= end; i++){
+      let tileState = checkRow ? move.BOARD[move.ROW][i] : move.BOARD[i][move.COL];
+      if (tileState.ISAVAILABLE === true && tileState.ISMILL === false){
+        tileState.ISMILL = true;
+        if (move.TURN === YELLOW_TURN) {
+          YELLOW_PLAYER.MILLPIECES += 1;
+        } else if (move.TURN === PURPLE_TURN) {
+          PURPLE_PLAYER.MILLPIECES += 1;
         }
-        return 1;
-    } else {
-        return 0;
+      }
     }
+    return 1;
+  } else {
+    return 0;
+  }
 }
 
 function isValidMove(move) {
@@ -56,7 +61,9 @@ function isValidMove(move) {
 function isRemovable(move) {
     // Is not part of a mill and has a piece
     let tileState = move.BOARD[move.ROW][move.COL];
-    return (tileState.ISAVAILABLE && tileState.TURN === move.TURN && !tileState.ISMILL);
+    console.log(move);
+    console.log(tileState);
+    return (tileState.ISAVAILABLE && tileState.TURN === move.TURN);
 }
 
 /**
