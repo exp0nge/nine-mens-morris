@@ -2,7 +2,7 @@ const SHARP_COLORS = {
     0: '#ff00ee', // purple
     1: '#f6ff00', // yellow
     default: '#000000'
-}
+};
 
 const STATES = {
     UNAVAILABLE: 0,
@@ -35,21 +35,21 @@ function makeMoveProp(row, col, turn, shift, shiftRow, shiftCol, board) {
 
 const ERRORS = {
     invalidMove: "Invalid move"
-}
+};
 
 const DIALOG = {
     purpleTurn: "Purple's turn",
     yellowTurn: "Yellow's turn"
-}
+};
 
 const PURPLE_PLAYER = {
-  AVAILABLE: 4,
+  AVAILABLE: 9,
   PLACED: 0,
   MILLPIECES: 0
 };
 
 const YELLOW_PLAYER = {
-  AVAILABLE: 3,
+  AVAILABLE: 9,
   PLACED: 0,
   MILLPIECES: 0
 };
