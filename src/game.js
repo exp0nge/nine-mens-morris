@@ -347,25 +347,7 @@ function phaseOneHandler(e) {
 }
 
 function phaseTwoHandler(e) {
-    let eId = e.getAttribute("id");
-    let row = parseInt(eId[0]);
-    let col = parseInt(eId[1]);
-    let tileState = board[row][col];
-    if (tileState.TURN != GAME_PROPERTIES.TURN) {
-        invalidMoveAlert();
-        return;
-    }
-    if (GAME_PROPERTIES.SOURCE === null) {
-        GAME_PROPERTIES.SOURCE = e;
-        return;
-    }
 
-    // at this point SOURCE is filled and we have id as destination
-    GAME_PROPERTIES.SOURCE.setAttribute("fill", SHARP_COLORS["default"]);
-    e.setAttribute("fill", SHARP_COLORS[GAME_PROPERTIES.TURN]);
-    GAME_PROPERTIES.SOURCE = null;
-    GAME_PROPERTIES.TURN = otherPlayer();
-    setTurnText();
 }
 
 setUpClicks((e) => {
