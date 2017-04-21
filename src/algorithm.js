@@ -34,23 +34,23 @@ function checkMill(move, start, end, checkRow) {
             count += 1;
         }
     }
-  if (count === 3){
-    // change ISMILL to true
-    for (let i = start; i <= end; i++){
-      let tileState = checkRow ? move.BOARD[move.ROW][i] : move.BOARD[i][move.COL];
-      if (tileState.ISAVAILABLE === true && tileState.ISMILL === false){
-        tileState.ISMILL = true;
-        if (move.TURN === YELLOW_TURN) {
-          YELLOW_PLAYER.MILLPIECES += 1;
-        } else if (move.TURN === PURPLE_TURN) {
-          PURPLE_PLAYER.MILLPIECES += 1;
+    if (count === 3) {
+        // change ISMILL to true
+        for (let i = start; i <= end; i++) {
+            let tileState = checkRow ? move.BOARD[move.ROW][i] : move.BOARD[i][move.COL];
+            if (tileState.ISAVAILABLE === true && tileState.ISMILL === false) {
+                tileState.ISMILL = true;
+                if (move.TURN === YELLOW_TURN) {
+                    YELLOW_PLAYER.MILLPIECES += 1;
+                } else if (move.TURN === PURPLE_TURN) {
+                    PURPLE_PLAYER.MILLPIECES += 1;
+                }
+            }
         }
-      }
+        return 1;
+    } else {
+        return 0;
     }
-    return 1;
-  } else {
-    return 0;
-  }
 }
 
 function isValidMove(move) {
