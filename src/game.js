@@ -1,6 +1,9 @@
 import * as algorithm from './algorithm.js';
 import { setUpClicks } from './events.js';
 import { SHARP_COLORS, STATES, makeMoveProp, ERRORS, DIALOG, PURPLE_PLAYER, YELLOW_PLAYER, PURPLE_TURN, YELLOW_TURN } from './common.js';
+import { setUpStringFormat } from './utils.js';
+
+setUpStringFormat();
 
 // Structs 
 const TILE = {
@@ -87,6 +90,14 @@ const turnPromptText = document.getElementById("turnPromptText");
 function setTurnText() {
     turnText.style.display = "block";
     turnText.innerHTML = GAME_PROPERTIES.TURN ? "YELLOW (1)" : "PURPLE (0)";
+}
+
+function setAlertText(message) {
+    alertText.style.display = "block";
+    alertText.innerHTML = message;
+    setTimeout(() => {
+        clearElement(alertText);
+    }, 2000);
 }
 
 function clearElement(element) {
@@ -238,6 +249,9 @@ function handleNewMills(move, originalHandler) {
 }
 
 function phase2() {
+    const svg = document.getElementById("board").getSVGDocument();
+
+    console.log("using phase 2 sync");
     while (PURPLE_PLAYER.PLACED > 2 && YELLOW_PLAYER.PLACED > 2) {
         let positions;
         let direction;
@@ -261,18 +275,25 @@ function phase2() {
 
         if (move.BOARD[move.ROW][move.COL].TURN !== GAME_PROPERTIES.TURN) {
             // Not your color
-            console.log("Invalid piece chosen");
+            setAlertText("Invalid piece chosen; please choose your own color!");
             continue;
         }
 
         if (shiftSoldier(move)) {
             // Update row and col for handleNewMills
+            let oldSpot = svg.getElementById("{0}{1}".format(String(move.ROW), String(move.COL)));
             move.ROW = move.SHIFTROW;
             move.COL = move.SHIFTCOL;
+
+            let newSpot = svg.getElementById("{0}{1}".format(String(move.SHIFTROW), String(move.SHIFTCOL)));
+            oldSpot.setAttribute("fill", SHARP_COLORS["default"]);
+            newSpot.setAttribute("fill", SHARP_COLORS[move.TURN]);
+
             handleNewMills(move);
+
             GAME_PROPERTIES.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
         } else {
-            console.log("Invalid shift");
+            setAlertText("Invalid shift");
         }
 
         printBoard();
@@ -341,14 +362,16 @@ function phaseOneHandler(e) {
         console.log("------------ PHASE 1 COMPLETE ------------");
         document.getElementById("phaseText").innerHTML = "Phase 2: Move and capture";
         GAME_PROPERTIES.PHASE = 2;
+
+        // blocking call
+        phase2();
+
     }
 
     setTurnText();
 }
 
-function phaseTwoHandler(e) {
-
-}
+function phaseTwoHandler(e) {}
 
 setUpClicks((e) => {
     if (GAME_PROPERTIES.PHASE === 1 || GAME_PROPERTIES.MILLS > 0) {
