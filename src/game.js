@@ -250,7 +250,6 @@ function handleNewMills(move, originalHandler) {
 
 function phase2() {
     const svg = document.getElementById("board").getSVGDocument();
-
     console.log("using phase 2 sync");
     while (PURPLE_PLAYER.PLACED > 2 && YELLOW_PLAYER.PLACED > 2) {
         let positions;
@@ -340,8 +339,10 @@ function phaseOneHandler(e) {
                 }
             } else {
                 invalidMoveAlert();
+                return;
             }
             // abort
+            checkPhaseOneEnd();
             return;
         }
         ////////////////////////////////////////////////////////////////
@@ -352,11 +353,21 @@ function phaseOneHandler(e) {
             }
         } else {
             invalidMoveAlert();
+            return;
         }
     } else {
         throw RangeError("GAME_PROPERTIES.TURN not handled");
     }
 
+    console.log(GAME_PROPERTIES)
+    console.log(PURPLE_PLAYER);
+    console.log(YELLOW_PLAYER);
+    checkPhaseOneEnd();
+
+    setTurnText();
+}
+
+function checkPhaseOneEnd() {
     if (PURPLE_PLAYER.AVAILABLE === 0 && YELLOW_PLAYER.AVAILABLE === 0 && !GAME_PROPERTIES.CAPTURING) {
         // phase 1 end
         console.log("------------ PHASE 1 COMPLETE ------------");
@@ -367,8 +378,6 @@ function phaseOneHandler(e) {
         phase2();
 
     }
-
-    setTurnText();
 }
 
 function phaseTwoHandler(e) {}

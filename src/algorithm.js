@@ -61,8 +61,7 @@ function isValidMove(move) {
 function isRemovable(move) {
     // Is not part of a mill and has a piece
     let tileState = move.BOARD[move.ROW][move.COL];
-    console.log(move);
-    console.log(tileState);
+
     return (tileState.ISAVAILABLE && tileState.TURN === move.TURN);
 }
 

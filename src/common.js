@@ -43,13 +43,13 @@ const DIALOG = {
 };
 
 const PURPLE_PLAYER = {
-    AVAILABLE: 5,
+    AVAILABLE: 4,
     PLACED: 0,
     MILLPIECES: 0
 };
 
 const YELLOW_PLAYER = {
-    AVAILABLE: 5,
+    AVAILABLE: 4,
     PLACED: 0,
     MILLPIECES: 0
 };
