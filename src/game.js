@@ -249,8 +249,6 @@ function handleNewMills(move, originalHandler) {
 }
 
 function phase2() {
-    const svg = document.getElementById("board").getSVGDocument();
-
     console.log("using phase 2 sync");
     while (PURPLE_PLAYER.PLACED > 2 && YELLOW_PLAYER.PLACED > 2) {
         let positions;
@@ -362,16 +360,48 @@ function phaseOneHandler(e) {
         console.log("------------ PHASE 1 COMPLETE ------------");
         document.getElementById("phaseText").innerHTML = "Phase 2: Move and capture";
         GAME_PROPERTIES.PHASE = 2;
-
-        // blocking call
-        phase2();
-
+        setMoveText();
     }
 
     setTurnText();
 }
 
-function phaseTwoHandler(e) {}
+function phaseTwoHandler(e) {
+    let id = e.getAttribute("id");
+
+
+    if (GAME_PROPERTIES.SOURCE === null) {
+        // check if piece is owned by turn
+        if (GAME_PROPERTIES.TURN !== board[parseInt(id[0])][parseInt(id[1])].TURN) {
+            console.log(board[parseInt(id[0])][parseInt(id[1])]);
+            setAlertText("Select a piece that you own to begin moving");
+            return;
+        }
+
+        GAME_PROPERTIES.SOURCE = e;
+        return;
+    } else {
+        let x = parseInt(id[0]);
+        let y = parseInt(id[1]);
+        let x_original = parseInt(GAME_PROPERTIES.SOURCE.getAttribute("id")[0]);
+        let y_original = parseInt(GAME_PROPERTIES.SOURCE.getAttribute("id")[1]);
+
+        if (board[x][y].TURN !== null) {
+            setAlertText("Select a empty spot to move the piece to");
+            return;
+        }
+        board[x_original][y_original].TURN = null;
+        board[x][y].TURN = GAME_PROPERTIES.TURN;
+        // TODO: check if this makes a mill + capture
+        GAME_PROPERTIES.SOURCE.setAttribute("fill", SHARP_COLORS["default"]);
+        GAME_PROPERTIES.SOURCE = null;
+        e.setAttribute("fill", SHARP_COLORS[GAME_PROPERTIES.TURN]);
+        GAME_PROPERTIES.TURN = otherPlayer();
+        setMoveText();
+    }
+}
+
+const svg = document.getElementById("board").getSVGDocument();
 
 setUpClicks((e) => {
     if (GAME_PROPERTIES.PHASE === 1 || GAME_PROPERTIES.MILLS > 0) {
