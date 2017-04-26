@@ -90,6 +90,7 @@ const turnPromptText = document.getElementById("turnPromptText");
 function setTurnText() {
     turnText.style.display = "block";
     turnText.innerHTML = GAME_PROPERTIES.TURN ? "YELLOW (1)" : "PURPLE (0)";
+    turnText.style.backgroundColor = SHARP_COLORS[GAME_PROPERTIES.TURN];
 }
 
 function setAlertText(message) {
@@ -119,6 +120,7 @@ function setMoveText() {
     } else {
         throw new TypeError("GAME_PROPERTIES.TURN invalid, expected 0 or 1 got " + String(GAME_PROPERTIES.TURN));
     }
+    turnPromptText.style.backgroundColor = SHARP_COLORS[GAME_PROPERTIES.TURN];
 }
 
 function startGame() {
@@ -377,7 +379,7 @@ function phaseTwoHandler(e) {
             setAlertText("Select a piece that you own to begin moving");
             return;
         }
-
+        e.setAttribute("stroke", "green");
         GAME_PROPERTIES.SOURCE = e;
         return;
     } else {
@@ -390,14 +392,18 @@ function phaseTwoHandler(e) {
             setAlertText("Select a empty spot to move the piece to");
             return;
         }
-        board[x_original][y_original].TURN = null;
-        board[x][y].TURN = GAME_PROPERTIES.TURN;
-        // TODO: check if this makes a mill + capture
-        GAME_PROPERTIES.SOURCE.setAttribute("fill", SHARP_COLORS["default"]);
-        GAME_PROPERTIES.SOURCE = null;
-        e.setAttribute("fill", SHARP_COLORS[GAME_PROPERTIES.TURN]);
-        GAME_PROPERTIES.TURN = otherPlayer();
-        setMoveText();
+        if (shiftSoldier(makeMoveProp(x_original, y_original, GAME_PROPERTIES.TURN, true, x, y, board))) {
+            // TODO: check if this makes a mill + capture
+            GAME_PROPERTIES.SOURCE.setAttribute("stroke", null);
+            GAME_PROPERTIES.SOURCE.setAttribute("fill", SHARP_COLORS["default"]);
+            GAME_PROPERTIES.SOURCE = null;
+            e.setAttribute("fill", SHARP_COLORS[GAME_PROPERTIES.TURN]);
+            GAME_PROPERTIES.TURN = otherPlayer();
+            setMoveText();
+        } else {
+            setAlertText("Invalid shift!");
+            return;
+        }
     }
 }
 
