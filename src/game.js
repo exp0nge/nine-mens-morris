@@ -1,4 +1,3 @@
-import * as algorithm from './algorithm.js';
 import { setUpClicks } from './events.js';
 import {
     SHARP_COLORS,
@@ -21,7 +20,7 @@ import { setUpStringFormat } from './utils.js';
 
 setUpStringFormat();
 
-// Structs 
+// Structs
 const TILE = {
     ISAVAILABLE: true,
     ISMILL: false,
@@ -86,7 +85,17 @@ const GAME_PROPERTIES = {
     CAPTURING: false,
     MILLS: 0,
     PHASE: 1,
-    SOURCE: null
+    SOURCE: null,
+    PURPLE_PLAYER: {
+        AVAILABLE: 4,
+        PLACED: 0,
+        MILLPIECES: 0
+    },
+    YELLOW_PLAYER: {
+        AVAILABLE: 4,
+        PLACED: 0,
+        MILLPIECES: 0
+    }
 };
 
 function otherPlayer() {
@@ -94,8 +103,8 @@ function otherPlayer() {
 }
 
 function checkLose() {
-    if (PURPLE_PLAYER.PLACED < 3) return PURPLE_TURN;
-    if (YELLOW_PLAYER.PLACED < 3) return YELLOW_TURN;
+    if (GAME_PROPERTIES.PURPLE_PLAYER.PLACED < 3) return PURPLE_TURN;
+    if (GAME_PROPERTIES.YELLOW_PLAYER.PLACED < 3) return YELLOW_TURN;
 }
 
 const alertText = document.getElementById("alertText");
@@ -144,9 +153,9 @@ function startGame() {
     GAME_PROPERTIES.TURN = coinFlip();
 
     setTurnText();
-    console.log(PURPLE_PLAYER);
-    console.log(YELLOW_PLAYER);
-    printBoard();
+    console.log(GAME_PROPERTIES.PURPLE_PLAYER);
+    console.log(GAME_PROPERTIES.YELLOW_PLAYER);
+    printBoard(board);
     // phase2();
     // if (checkLose() === PURPLE_TURN) {
     //   console.log("Yellow Wins");
@@ -158,7 +167,7 @@ function startGame() {
 function phase2() {
     const svg = document.getElementById("board").getSVGDocument();
     console.log("using phase 2 sync");
-    while (PURPLE_PLAYER.PLACED > 2 && YELLOW_PLAYER.PLACED > 2) {
+    while (GAME_PROPERTIES.PURPLE_PLAYER.PLACED > 2 && GAME_PROPERTIES.YELLOW_PLAYER.PLACED > 2) {
         let positions;
         let direction;
         if (GAME_PROPERTIES.TURN === YELLOW_TURN) {
@@ -202,7 +211,7 @@ function phase2() {
             setAlertText("Invalid shift");
         }
 
-        printBoard();
+        printBoard(board);
     }
 }
 
@@ -253,9 +262,10 @@ function phaseOneHandler(e) {
             return;
         }
         ////////////////////////////////////////////////////////////////
-        if (placeSoldier(move, board)) {
+        if (placeSoldier(move, board, GAME_PROPERTIES)) {
             e.setAttribute("fill", SHARP_COLORS[GAME_PROPERTIES.TURN]);
-            if (handleNewMills(move, phaseOneHandler)) {
+            if (handleNewMills(move, phaseOneHandler, GAME_PROPERTIES)) {
+                console.log(move);
                 GAME_PROPERTIES.TURN = otherPlayer();
             }
         } else {
@@ -267,15 +277,15 @@ function phaseOneHandler(e) {
     }
 
     console.log(GAME_PROPERTIES)
-    console.log(PURPLE_PLAYER);
-    console.log(YELLOW_PLAYER);
+    console.log(GAME_PROPERTIES.PURPLE_PLAYER);
+    console.log(GAME_PROPERTIES.YELLOW_PLAYER);
     checkPhaseOneEnd();
 
     setTurnText();
 }
 
 function checkPhaseOneEnd() {
-    if (PURPLE_PLAYER.AVAILABLE === 0 && YELLOW_PLAYER.AVAILABLE === 0 && !GAME_PROPERTIES.CAPTURING) {
+    if (GAME_PROPERTIES.PURPLE_PLAYER.AVAILABLE === 0 && GAME_PROPERTIES.YELLOW_PLAYER.AVAILABLE === 0 && !GAME_PROPERTIES.CAPTURING) {
         // phase 1 end
         console.log("------------ PHASE 1 COMPLETE ------------");
         document.getElementById("phaseText").innerHTML = "Phase 2: Move and capture";
