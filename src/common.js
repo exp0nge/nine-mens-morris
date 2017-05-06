@@ -90,14 +90,14 @@ function removeSoldier(move, gameProperties) {
         return false;
     }
 
-    if (!board[move.ROW][move.COL].ISMILL) { // not a mill
-        board[move.ROW][move.COL].TURN = null;
+    if (!move.BOARD[move.ROW][move.COL].ISMILL) { // not a mill
+        move.BOARD[move.ROW][move.COL].TURN = null;
         removingPiece.PLACED--;
         return true;
     } else { // is a mill
         if (removingPiece.PLACED - removingPiece.MILLPIECES === 0) { // Removing from mill is possible if only mills are left
-            board[move.ROW][move.COL].TURN = null;
-            board[move.ROW][move.COL].ISMILL = false;
+            move.BOARD[move.ROW][move.COL].TURN = null;
+            move.BOARD[move.ROW][move.COL].ISMILL = false;
             removingPiece.PLACED--;
             removingPiece.MILLPIECES--;
             return true;
@@ -106,29 +106,36 @@ function removeSoldier(move, gameProperties) {
     }
 }
 
-function shiftSoldier(move) {
+function shiftSoldier(move, gameProperties) {
     if (algorithm.isValidShift(move)) {
         // reset state of current
-        board[move.ROW][move.COL].TURN = null;
-        if (board[move.ROW][move.COL].ISMILL === true) {
+        move.BOARD[move.ROW][move.COL].TURN = null;
+        if (move.BOARD[move.ROW][move.COL].ISMILL === true) {
             if (move.TURN === PURPLE_TURN) {
-                PURPLE_PLAYER.MILLPIECES--;
+                gameProperties.PURPLE_PLAYER.MILLPIECES--;
             } else {
-                YELLOW_PLAYER.MILLPIECES--;
+                gameProperties.YELLOW_PLAYER.MILLPIECES--;
             }
-            board[move.ROW][move.COL].ISMILL = false;
+            move.BOARD[move.ROW][move.COL].ISMILL = false;
         }
 
         // update color of new
-        board[move.SHIFTROW][move.SHIFTCOL].TURN = move.TURN;
+        move.BOARD[move.SHIFTROW][move.SHIFTCOL].TURN = move.TURN;
         return true;
     }
 
     return false;
 }
 
+const turnPromptText = document.getElementById("turnPromptText");
+
+function setCaptureText(message) {
+    turnPromptText.style.display = "block";
+    turnPromptText.innerHTML = message;
+}
+
 function handleNewMills(move, originalHandler, gameProperties) {
-    let numMills = algorithm.countNewMills(move);
+    let numMills = algorithm.countNewMills(move, gameProperties);
     printBoard(move.BOARD);
     if (numMills > 0) { // Made a mill
         printBoard(move.BOARD);
@@ -159,4 +166,4 @@ function handleNewMills(move, originalHandler, gameProperties) {
     }
 }
 
-export { SHARP_COLORS, STATES, makeMoveProp, ERRORS, DIALOG, PURPLE_TURN, YELLOW_TURN, MATRIX_SIZE, printBoard, placeSoldier, handleNewMills};
+export { SHARP_COLORS, STATES, makeMoveProp, ERRORS, DIALOG, PURPLE_TURN, YELLOW_TURN, MATRIX_SIZE, printBoard, placeSoldier, removeSoldier, shiftSoldier, handleNewMills};

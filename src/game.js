@@ -194,7 +194,7 @@ function phase2() {
             continue;
         }
 
-        if (shiftSoldier(move)) {
+        if (shiftSoldier(move, GAME_PROPERTIES)) {
             // Update row and col for handleNewMills
             let oldSpot = svg.getElementById("{0}{1}".format(String(move.ROW), String(move.COL)));
             move.ROW = move.SHIFTROW;
@@ -244,7 +244,7 @@ function phaseOneHandler(e) {
         if (GAME_PROPERTIES.CAPTURING && GAME_PROPERTIES.MILLS > 0) {
             console.log("CAPTURING");
             move.TURN = otherPlayer();
-            if (removeSoldier(move)) {
+            if (removeSoldier(move, GAME_PROPERTIES)) {
                 e.setAttribute("fill", SHARP_COLORS['default']);
                 GAME_PROPERTIES.MILLS -= 1;
                 if (GAME_PROPERTIES.MILLS === 0) {
@@ -252,6 +252,7 @@ function phaseOneHandler(e) {
                     GAME_PROPERTIES.TURN = otherPlayer();
                     setTurnText();
                     clearElement(turnPromptText);
+                    console.log("HERE");
                 }
             } else {
                 invalidMoveAlert();
@@ -276,7 +277,7 @@ function phaseOneHandler(e) {
         throw RangeError("GAME_PROPERTIES.TURN not handled");
     }
 
-    console.log(GAME_PROPERTIES)
+    console.log(GAME_PROPERTIES);
     console.log(GAME_PROPERTIES.PURPLE_PLAYER);
     console.log(GAME_PROPERTIES.YELLOW_PLAYER);
     checkPhaseOneEnd();
@@ -292,6 +293,7 @@ function checkPhaseOneEnd() {
         GAME_PROPERTIES.PHASE = 2;
 
         // blocking call
+        //TODO: blocking call so GUI won't update even after placing or removing last piece
         phase2();
 
     }
