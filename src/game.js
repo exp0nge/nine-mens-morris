@@ -372,11 +372,12 @@ function phaseOneHandler(e) {
 }
 
 function alertIfWinner() {
-    if (PURPLE_PLAYER.PLACED <= 2 || YELLOW_PLAYER.PLACED <= 2) {
+    if ((PURPLE_PLAYER.PLACED <= 2 && PURPLE_PLAYER.AVAILABLE <= 0) ||
+        (YELLOW_PLAYER.PLACED <= 2 && YELLOW_PLAYER.AVAILABLE <= 0)) {
         clearElement(turnPromptText);
         clearElement(turnText);
         document.getElementById("phaseText").innerHTML = "WINNER " +
-            (PURPLE_PLAYER.AVAILABLE <= 0 ? "YELLOW" : "PURPLE");
+            (PURPLE_PLAYER.AVAILABLE <= 2 ? "YELLOW" : "PURPLE");
         GAME_PROPERTIES.TURN = null;
     }
 }
@@ -393,6 +394,7 @@ function phaseTwoHandler(e) {
             e.setAttribute("fill", SHARP_COLORS["default"]);
         } else {
             invalidMoveAlert();
+            return;
         }
     }
 
@@ -436,9 +438,6 @@ function phaseTwoHandler(e) {
             return;
         }
     }
-
-    alertIfWinner();
-
 }
 
 const svg = document.getElementById("board").getSVGDocument();
@@ -449,4 +448,5 @@ setUpClicks((e) => {
     } else if (GAME_PROPERTIES.PHASE === 2) {
         phaseTwoHandler(e);
     }
+    alertIfWinner();
 });
