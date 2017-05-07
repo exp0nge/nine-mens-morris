@@ -1,4 +1,4 @@
-import { STATES, PURPLE_PLAYER, YELLOW_PLAYER, PURPLE_TURN, YELLOW_TURN } from './common.js'
+import { STATES, PURPLE_PLAYER, YELLOW_PLAYER, PURPLE_TURN, YELLOW_TURN, Coordinate } from './common.js'
 
 const CENTER_POSITION = 3;
 
@@ -69,79 +69,57 @@ function isRemovable(move) {
 /**
 Phase 2 Functions
 **/
-const SHIFT = {
-    LEFT: 0,
-    RIGHT: 1,
-    UP: 2,
-    DOWN: 3
+
+const VALID_SHIFTS = {
+    0: {
+        0: [new Coordinate(0, 3), new Coordinate(3, 0)],
+        3: [new Coordinate(1, 3), new Coordinate(0, 0), new Coordinate(0, 6)],
+        6: [new Coordinate(0, 3), new Coordinate(3, 6)]
+    },
+    1: {
+        1: [new Coordinate(1, 3), new Coordinate(3, 1)],
+        3: [new Coordinate(1, 1), new Coordinate(0, 3), new Coordinate(1, 5), new Coordinate(2, 3)],
+        5: [new Coordinate(1, 3), new Coordinate(3, 5)]
+    },
+    2: {
+        2: [new Coordinate(2, 3), new Coordinate(3, 2)],
+        3: [new Coordinate(2, 2), new Coordinate(1, 3), new Coordinate(2, 4)],
+        4: [new Coordinate(2, 3), new Coordinate(3, 4)]
+    },
+    3: {
+        0: [new Coordinate(0, 0), new Coordinate(3, 1), new Coordinate(6, 0)],
+        1: [new Coordinate(1, 1), new Coordinate(3, 0), new Coordinate(3, 2), new Coordinate(5, 1)],
+        2: [new Coordinate(2, 2), new Coordinate(3, 1), new Coordinate(4, 2)],
+        4: [new Coordinate(2, 4), new Coordinate(4, 4), new Coordinate(3, 5)],
+        5: [new Coordinate(1, 5), new Coordinate(3, 4), new Coordinate(3, 6), new Coordinate(5, 5)],
+        6: [new Coordinate(0, 6), new Coordinate(3, 5), new Coordinate(6, 6)]
+    }
 };
 
+const mapRows = {
+    4: 2,
+    5: 1,
+    6: 0
+}
+
 function isValidShift(move) {
-    let i = move.ROW;
-    let j = move.COL;
-    let t1 = 0;
-    let t2 = 0;
-    let rowBounds = [0, 6];
-    let colBounds = [0, 6];
-
-    // Make sure that there is a piece to move
-    if (!move.BOARD[move.ROW][move.COL].ISAVAILABLE) {
-        return false;
+    console.log(move);
+    let row = move.ROW > 3 ? mapRows[move.ROW] : move.ROW;
+    let shiftRow = move.SHIFTROW > 3 ? mapRows[move.SHIFTROW] : move.SHIFTROW;
+    console.log("row: " + row);
+    console.log("shift row: " + shiftRow);
+    if (VALID_SHIFTS[row] === undefined || VALID_SHIFTS[row][move.COL] === undefined) {
+        return false
     }
 
-    // Translation for shift
-    switch (move.SHIFT) {
-        case SHIFT.LEFT:
-            t2 = -1;
-            break;
-        case SHIFT.RIGHT:
-            t2 = 1;
-            break;
-        case SHIFT.UP:
-            t1 = -1;
-            break;
-        case SHIFT.DOWN:
-            t1 = 1;
-            break;
-        default:
-            return false;
-    }
-
-    // Special cases for center row/column
-    if (move.ROW === CENTER_POSITION) {
-        if (move.COL < CENTER_POSITION) {
-            colBounds[1] = CENTER_POSITION;
-        } else {
-            colBounds[0] = CENTER_POSITION;
+    for (var i = 0; i < VALID_SHIFTS[row][move.COL].length; i++) {
+        let element = VALID_SHIFTS[row][move.COL][i];
+        if (element.X === shiftRow && element.Y === move.SHIFTCOL) {
+            return true;
         }
     }
 
-    if (move.COL === CENTER_POSITION) {
-        if (move.ROW < CENTER_POSITION) {
-            rowBounds[1] = CENTER_POSITION;
-        } else {
-            rowBounds[0] = CENTER_POSITION;
-        }
-    }
-
-    while (true) { // Continue moving in a direction
-        i += t1;
-        j += t2;
-
-        if (i < rowBounds[0] || i > rowBounds[1] || j < colBounds[0] || j > colBounds[1]) { // Out of bounds
-            return false;
-        }
-
-        if (move.BOARD[i][j].ISAVAILABLE) {
-            if (move.BOARD[i][j].TURN === null) { // No piece there, we can shift
-                move.SHIFTROW = i;
-                move.SHIFTCOL = j;
-                return true;
-            } else {
-                return false;
-            }
-        }
-    }
+    return false;
 }
 
 export { countNewMills, isValidMove, isRemovable, isValidShift };
