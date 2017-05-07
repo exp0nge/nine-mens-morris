@@ -57,4 +57,11 @@ const YELLOW_PLAYER = {
 const PURPLE_TURN = 0;
 const YELLOW_TURN = 1;
 
-export { SHARP_COLORS, STATES, makeMoveProp, ERRORS, DIALOG, PURPLE_PLAYER, YELLOW_PLAYER, PURPLE_TURN, YELLOW_TURN };
+class Coordinate {
+    constructor(x, y) {
+        this.X = x;
+        this.Y = y;
+    }
+}
+
+export { SHARP_COLORS, STATES, makeMoveProp, ERRORS, DIALOG, PURPLE_PLAYER, YELLOW_PLAYER, PURPLE_TURN, YELLOW_TURN, Coordinate };
