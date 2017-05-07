@@ -87,9 +87,9 @@ const alert = document.getElementById("alert");
 const turnText = document.getElementById("turnText");
 const turnPromptText = document.getElementById("turnPromptText");
 
-function setTurnText() {
+function setTurnText(message) {
     turnText.style.display = "block";
-    turnText.innerHTML = GAME_PROPERTIES.TURN ? "YELLOW (1)" : "PURPLE (0)";
+    turnText.innerHTML = message || GAME_PROPERTIES.TURN ? "YELLOW (1)" : "PURPLE (0)";
     turnText.style.backgroundColor = SHARP_COLORS[GAME_PROPERTIES.TURN];
 }
 
@@ -107,6 +107,7 @@ function clearElement(element) {
 }
 
 function setCaptureText(message) {
+    console.log(message);
     turnPromptText.style.display = "block";
     turnPromptText.innerHTML = message;
 }
@@ -218,11 +219,14 @@ function shiftSoldier(move) {
     return false;
 }
 
-function handleNewMills(move, originalHandler) {
+function isMillBreakable() {
+    let removingPiece = (((GAME_PROPERTIES.TURN + 1) % 2) === PURPLE_TURN) ? PURPLE_PLAYER : YELLOW_PLAYER;
+    return removingPiece.PLACED - removingPiece.MILLPIECES === 0;
+}
+
+function handleNewMills(move) {
     let numMills = algorithm.countNewMills(move);
-    printBoard();
     if (numMills > 0) { // Made a mill
-        printBoard();
         let message = "";
         if (GAME_PROPERTIES.TURN === YELLOW_TURN) {
             message = "Click on a PURPLE piece to remove";
@@ -230,8 +234,7 @@ function handleNewMills(move, originalHandler) {
             message = "Click on a YELLOW piece to remove";
         }
 
-        let removingPiece = (((GAME_PROPERTIES.TURN + 1) % 2) === PURPLE_TURN) ? PURPLE_PLAYER : YELLOW_PLAYER;
-        if (removingPiece.PLACED - removingPiece.MILLPIECES === 0) { // Removing from mill is possible if only mills are left
+        if (isMillBreakable()) { // Removing from mill is possible if only mills are left
             message += " that is part of a mill";
         } else {
             message += " that is not part of a mill";
@@ -347,7 +350,7 @@ function phaseOneHandler(e) {
         ////////////////////////////////////////////////////////////////
         if (placeSoldier(move)) {
             e.setAttribute("fill", SHARP_COLORS[GAME_PROPERTIES.TURN]);
-            if (handleNewMills(move, phaseOneHandler)) {
+            if (handleNewMills(move)) {
                 GAME_PROPERTIES.TURN = otherPlayer();
             }
         } else {
@@ -368,14 +371,35 @@ function phaseOneHandler(e) {
     setTurnText();
 }
 
+function alertIfWinner() {
+    if (PURPLE_PLAYER.PLACED <= 2 || YELLOW_PLAYER.PLACED <= 2) {
+        clearElement(turnPromptText);
+        clearElement(turnText);
+        document.getElementById("phaseText").innerHTML = "WINNER " +
+            (PURPLE_PLAYER.AVAILABLE <= 0 ? "YELLOW" : "PURPLE");
+        GAME_PROPERTIES.TURN = null;
+    }
+}
+
 function phaseTwoHandler(e) {
     let id = e.getAttribute("id");
 
+    let x = parseInt(id[0]);
+    let y = parseInt(id[1]);
+
+    if (GAME_PROPERTIES.CAPTURING && GAME_PROPERTIES.MILLS > 0) {
+        // currently capturing
+        if (removeSoldier) {
+            e.setAttribute("fill", SHARP_COLORS["default"]);
+        } else {
+            invalidMoveAlert();
+        }
+    }
 
     if (GAME_PROPERTIES.SOURCE === null) {
         // check if piece is owned by turn
-        if (GAME_PROPERTIES.TURN !== board[parseInt(id[0])][parseInt(id[1])].TURN) {
-            console.log(board[parseInt(id[0])][parseInt(id[1])]);
+        if (GAME_PROPERTIES.TURN !== board[x][y].TURN && board[x][y].ISAVAILABLE) {
+            console.log(board[x][y]);
             setAlertText("Select a piece that you own to begin moving");
             return;
         }
@@ -383,8 +407,6 @@ function phaseTwoHandler(e) {
         GAME_PROPERTIES.SOURCE = e;
         return;
     } else {
-        let x = parseInt(id[0]);
-        let y = parseInt(id[1]);
         let x_original = parseInt(GAME_PROPERTIES.SOURCE.getAttribute("id")[0]);
         let y_original = parseInt(GAME_PROPERTIES.SOURCE.getAttribute("id")[1]);
 
@@ -392,19 +414,31 @@ function phaseTwoHandler(e) {
             setAlertText("Select a empty spot to move the piece to");
             return;
         }
-        if (shiftSoldier(makeMoveProp(x_original, y_original, GAME_PROPERTIES.TURN, true, x, y, board))) {
+        let move = makeMoveProp(x_original, y_original, GAME_PROPERTIES.TURN, true, x, y, board);
+        if (shiftSoldier(move)) {
             // TODO: check if this makes a mill + capture
             GAME_PROPERTIES.SOURCE.setAttribute("stroke", null);
             GAME_PROPERTIES.SOURCE.setAttribute("fill", SHARP_COLORS["default"]);
             GAME_PROPERTIES.SOURCE = null;
             e.setAttribute("fill", SHARP_COLORS[GAME_PROPERTIES.TURN]);
-            GAME_PROPERTIES.TURN = otherPlayer();
-            setMoveText();
+
+
+            // Check if mills formed
+            move.ROW = move.SHIFTROW;
+            move.COL = move.SHIFTCOL;
+            if (handleNewMills(move)) {
+                GAME_PROPERTIES.TURN = otherPlayer();
+                setTurnText();
+                setMoveText();
+            }
         } else {
             setAlertText("Invalid shift!");
             return;
         }
     }
+
+    alertIfWinner();
+
 }
 
 const svg = document.getElementById("board").getSVGDocument();
