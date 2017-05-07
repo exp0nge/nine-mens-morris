@@ -17,6 +17,7 @@ import {
     handleNewMills
 } from './common.js';
 import { setUpStringFormat } from './utils.js';
+import { minimax, bestMove } from './minimax.js';
 
 setUpStringFormat();
 
@@ -25,10 +26,10 @@ const TILE = {
     ISAVAILABLE: true,
     ISMILL: false,
     TURN: null
-}
-
+};
 
 const board = new Array(MATRIX_SIZE);
+var computerTurn = false;
 
 function init() {
     for (let i = 0; i < MATRIX_SIZE; i++) {
@@ -99,6 +100,7 @@ const GAME_PROPERTIES = {
 };
 
 function otherPlayer() {
+    computerTurn = !computerTurn;
     return GAME_PROPERTIES.TURN !== null ? (GAME_PROPERTIES.TURN + 1) % 2 : null;
 }
 
@@ -234,7 +236,14 @@ function invalidMoveAlert() {
 
 function phaseOneHandler(e) {
     let id = e.getAttribute("id");
-    let move = makeMoveProp(parseInt(id[0]), parseInt(id[1]), null, null, null, null, board);
+    let move;
+    if (!computerTurn) {
+        move = makeMoveProp(parseInt(id[0]), parseInt(id[1]), null, null, null, null, board);
+    } else {
+        minimax(1, GAME_PROPERTIES.TURN, GAME_PROPERTIES.TURN, board, GAME_PROPERTIES);
+        move = bestMove;
+    }
+
     if (GAME_PROPERTIES.TURN === PURPLE_TURN || GAME_PROPERTIES.TURN === YELLOW_TURN) {
         console.log(GAME_PROPERTIES.TURN);
         move.TURN = GAME_PROPERTIES.TURN;
@@ -252,7 +261,6 @@ function phaseOneHandler(e) {
                     GAME_PROPERTIES.TURN = otherPlayer();
                     setTurnText();
                     clearElement(turnPromptText);
-                    console.log("HERE");
                 }
             } else {
                 invalidMoveAlert();
@@ -308,3 +316,4 @@ setUpClicks((e) => {
         phaseTwoHandler(e);
     }
 });
+

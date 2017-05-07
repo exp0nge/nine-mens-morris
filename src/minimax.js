@@ -5,8 +5,12 @@ import {
     placeSoldier,
     removeSoldier,
     shiftSoldier,
-    makeMoveProp
+    makeMoveProp,
+    YELLOW_TURN,
+    PURPLE_TURN
 } from './common.js';
+
+var bestMove;
 
 class PhaseOnePossibleMove {
     constructor(row, col, turn) {
@@ -66,10 +70,33 @@ class BestMove {
     }
 }
 
+function cloneGameProperties(gameProperties) {
+    var clone = {
+        TURN: gameProperties.TURN,
+        CAPTURING: gameProperties.CAPTURING,
+        MILLS: gameProperties.MILLS,
+        PHASE: gameProperties.PHASE,
+        SOURCE: gameProperties.SOURCE,
+        PURPLE_PLAYER: {
+            AVAILABLE: gameProperties.PURPLE_PLAYER.AVAILABLE,
+            PLACED: gameProperties.PURPLE_PLAYER.PLACED,
+            MILLPIECES: gameProperties.PURPLE_PLAYER.MILLPIECES
+        },
+        YELLOW_PLAYER: {
+            AVAILABLE: gameProperties.YELLOW_PLAYER.AVAILABLE,
+            PLACED: gameProperties.YELLOW_PLAYER.PLACED,
+            MILLPIECES: gameProperties.YELLOW_PLAYER.MILLPIECES
+        }
+    };
+
+
+    return clone;
+}
+
 function minimax(depth, turn, maxTurn, board, gameProperties) {
     // TODO: add AVAILABLE === 0. DONE
     if (depth === 0 || (turn === YELLOW_TURN ? gameProperties.YELLOW_PLAYER.AVAILABLE === 0 : gameProperties.PURPLE_PLAYER.AVAILABLE === 0))  {
-        return scoreBoard(turn, board);
+        return scoreBoard(turn, board, gameProperties);
     }
     // TODO: localize PURPLE and YELLOW player
     // TODO: Check if mill. DONE
@@ -80,13 +107,13 @@ function minimax(depth, turn, maxTurn, board, gameProperties) {
         for (let i = 0; i < moves.length; i++) {
             let move = moves[i];
             let potentialBoard = board.slice();
-            let copyGameProperties = gameProperties.slice();
             let moveProp = makeMoveProp(move.row, move.col, turn, null, null, null, potentialBoard);
 
-            placeSoldier(moveProp, potentialBoard, gameProperties);
-            handleNewMills(moveProp, gameProperties);
+            let copyGameProperties = cloneGameProperties(gameProperties);
+            placeSoldier(moveProp, potentialBoard, copyGameProperties);
+            handleNewMills(moveProp, copyGameProperties);
 
-            let maximizeMove = minimax(--depth, (turn + 1) % 2, maxTurn, potentialBoard);
+            let maximizeMove = minimax(depth-1, (turn + 1) % 2, maxTurn, potentialBoard, copyGameProperties);
             let score = maximizeMove.score;
             if (score > maxScore) {
                 maxScore = score;
@@ -97,7 +124,8 @@ function minimax(depth, turn, maxTurn, board, gameProperties) {
             console.log(potentialBoard);
             throw new ExceptionInformation("Max unable to find move, ^ the board");
         }
-        return new BestMove(maxMove.row, maxMove.col, maxScore);
+        bestMove = BestMove(maxMove.row, maxMove.col, maxScore);
+        return maxScore;
     } else {
         let moves = findPhaseOneMoves(turn, board);
         let minScore = Infinity;
@@ -105,13 +133,13 @@ function minimax(depth, turn, maxTurn, board, gameProperties) {
         for (let i = 0; i < moves.length; i++) {
             let move = moves[i];
             let potentialBoard = board.slice();
-            let copyGameProperties = gameProperties.slice();
             let moveProp = makeMoveProp(move.row, move.col, turn, null, null, null, potentialBoard);
 
-            placeSoldier(moveProp, potentialBoard, gameProperties);
-            handleNewMills(moveProp, gameProperties);
+            let copyGameProperties = cloneGameProperties(gameProperties);
+            placeSoldier(moveProp, potentialBoard, copyGameProperties);
+            handleNewMills(moveProp, copyGameProperties);
 
-            let minimizeMove = minimax(--depth, (turn + 1) % 2, (turn + 1) % 2, potentialBoard);
+            let minimizeMove = minimax(depth-1, (turn + 1) % 2, (turn + 1) % 2, potentialBoard, copyGameProperties);
             let score = minimizeMove.score;
             if (score < minMove) {
                 minScore = score;
@@ -122,7 +150,8 @@ function minimax(depth, turn, maxTurn, board, gameProperties) {
             console.log(potentialBoard);
             throw new ExceptionInformation("Min unable to find move, ^ the board");
         }
-        return new BestMove(minMove.row, minMove.col, minScore);
+        bestMove = BestMove(minMove.row, minMove.col, minScore);
+        return minScore;
     }
 }
 
@@ -144,7 +173,7 @@ function handleNewMills(move, gameProperties) {
                 if (isRemovable(move))  {
                     if ((removeMillPiece && move.BOARD[move.ROW][move.COL].ISMILL) ||
                         (!removeMillPiece && !move.BOARD[move.ROW][move.COL].ISMILL)) {
-                        removeSoldier(move);
+                        removeSoldier(move, gameProperties);
                         break;
                     }
                 }
@@ -152,3 +181,5 @@ function handleNewMills(move, gameProperties) {
         }
     }
 }
+
+export {minimax, bestMove};
