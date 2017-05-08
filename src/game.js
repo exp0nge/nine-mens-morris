@@ -380,7 +380,8 @@ function alertIfWinner() {
         clearElement(turnPromptText);
         clearElement(turnText);
         document.getElementById("phaseText").innerHTML = "WINNER " +
-            (PURPLE_PLAYER.PLACED + PURPLE_PLAYER.AVAILABLE <= 2 ? "YELLOW" : "PURPLE");
+            (PURPLE_PLAYER.PLACED + PURPLE_PLAYER.AVAILABLE <= 2 ? "YELLOW" : "PURPLE") +
+            " <a href='/'>(refresh)</a>";
         GAME_PROPERTIES.TURN = null;
     }
 }
