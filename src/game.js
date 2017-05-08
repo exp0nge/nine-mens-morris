@@ -110,6 +110,7 @@ function setCaptureText(message) {
     console.log(message);
     turnPromptText.style.display = "block";
     turnPromptText.innerHTML = message;
+    turnPromptText.style.backgroundColor = SHARP_COLORS[GAME_PROPERTIES.TURN];
 }
 
 function setMoveText() {
@@ -343,6 +344,7 @@ function phaseOneHandler(e) {
                 }
             } else {
                 invalidMoveAlert();
+                return;
             }
             // abort
             return;
@@ -355,6 +357,7 @@ function phaseOneHandler(e) {
             }
         } else {
             invalidMoveAlert();
+            return;
         }
     } else {
         throw RangeError("GAME_PROPERTIES.TURN not handled");
@@ -372,12 +375,12 @@ function phaseOneHandler(e) {
 }
 
 function alertIfWinner() {
-    if ((PURPLE_PLAYER.PLACED <= 2 && PURPLE_PLAYER.AVAILABLE <= 0) ||
-        (YELLOW_PLAYER.PLACED <= 2 && YELLOW_PLAYER.AVAILABLE <= 0)) {
+    if ((PURPLE_PLAYER.PLACED + PURPLE_PLAYER.AVAILABLE <= 2) ||
+        (YELLOW_PLAYER.PLACED + YELLOW_PLAYER.AVAILABLE <= 2)) {
         clearElement(turnPromptText);
         clearElement(turnText);
         document.getElementById("phaseText").innerHTML = "WINNER " +
-            (PURPLE_PLAYER.AVAILABLE <= 2 ? "YELLOW" : "PURPLE");
+            (PURPLE_PLAYER.PLACED + PURPLE_PLAYER.AVAILABLE <= 2 ? "YELLOW" : "PURPLE");
         GAME_PROPERTIES.TURN = null;
     }
 }
