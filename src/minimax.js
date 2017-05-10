@@ -71,7 +71,7 @@ class BestMove {
 }
 
 function cloneGameProperties(gameProperties) {
-    var clone = {
+    let clone = {
         TURN: gameProperties.TURN,
         CAPTURING: gameProperties.CAPTURING,
         MILLS: gameProperties.MILLS,
@@ -93,6 +93,15 @@ function cloneGameProperties(gameProperties) {
     return clone;
 }
 
+function cloneBoard(board) {
+    let clone = [];
+    for(let i=0; i<board.length; i++) {
+        clone[i] = board[i].slice();
+    }
+
+    return clone;
+}
+
 function minimax(depth, turn, maxTurn, board, gameProperties) {
     // TODO: add AVAILABLE === 0. DONE
     if (depth === 0 || (turn === YELLOW_TURN ? gameProperties.YELLOW_PLAYER.AVAILABLE === 0 : gameProperties.PURPLE_PLAYER.AVAILABLE === 0))  {
@@ -106,15 +115,16 @@ function minimax(depth, turn, maxTurn, board, gameProperties) {
         let maxMove;
         for (let i = 0; i < moves.length; i++) {
             let move = moves[i];
-            let potentialBoard = board.slice();
+            let potentialBoard = cloneBoard(board);
             let moveProp = makeMoveProp(move.row, move.col, turn, null, null, null, potentialBoard);
 
             let copyGameProperties = cloneGameProperties(gameProperties);
             placeSoldier(moveProp, potentialBoard, copyGameProperties);
             handleNewMills(moveProp, copyGameProperties);
 
-            let maximizeMove = minimax(depth-1, (turn + 1) % 2, maxTurn, potentialBoard, copyGameProperties);
-            let score = maximizeMove.score;
+
+            // Are we returning move or board or both?
+            let score = minimax(depth-1, (turn + 1) % 2, maxTurn, potentialBoard, copyGameProperties);
             if (score > maxScore) {
                 maxScore = score;
                 maxMove = move;
@@ -132,16 +142,15 @@ function minimax(depth, turn, maxTurn, board, gameProperties) {
         let minMove;
         for (let i = 0; i < moves.length; i++) {
             let move = moves[i];
-            let potentialBoard = board.slice();
+            let potentialBoard = cloneBoard(board);
             let moveProp = makeMoveProp(move.row, move.col, turn, null, null, null, potentialBoard);
 
             let copyGameProperties = cloneGameProperties(gameProperties);
             placeSoldier(moveProp, potentialBoard, copyGameProperties);
             handleNewMills(moveProp, copyGameProperties);
 
-            let minimizeMove = minimax(depth-1, (turn + 1) % 2, (turn + 1) % 2, potentialBoard, copyGameProperties);
-            let score = minimizeMove.score;
-            if (score < minMove) {
+            let score = minimax(depth-1, (turn + 1) % 2, maxTurn, potentialBoard, copyGameProperties);
+            if (score < minScore) {
                 minScore = score;
                 minMove = move;
             }

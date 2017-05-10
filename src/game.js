@@ -240,6 +240,7 @@ function phaseOneHandler(e) {
     if (!computerTurn) {
         move = makeMoveProp(parseInt(id[0]), parseInt(id[1]), null, null, null, null, board);
     } else {
+        bestMove;
         minimax(1, GAME_PROPERTIES.TURN, GAME_PROPERTIES.TURN, board, GAME_PROPERTIES);
         move = bestMove;
     }
