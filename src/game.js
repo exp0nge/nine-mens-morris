@@ -1,5 +1,5 @@
 import * as algorithm from './algorithm.js';
-import {PURPLE_PLAYER, YELLOW_PLAYER, PURPLE_TURN, YELLOW_TURN} from './common.js';
+import * as common from './common.js';
 
 // Structs
 const TILE = {
@@ -81,12 +81,14 @@ function coinFlip() {
 const GAME_PROPERTIES = {
     TURN: null,
     CAPTURING: false,
-    MILLS: 0
+    MILLS: 0,
+    PURPLE_PLAYER: common.PURPLE_PLAYER,
+    YELLOW_PLAYER: common.YELLOW_PLAYER,
 };
 
 function checkLose() {
-    if (PURPLE_PLAYER.PLACED < 3) return PURPLE_TURN;
-    if (YELLOW_PLAYER.PLACED < 3) return YELLOW_TURN;
+    if (PURPLE_PLAYER.PLACED < 3) return common.PURPLE_TURN;
+    if (YELLOW_PLAYER.PLACED < 3) return common.YELLOW_TURN;
 }
 
 function startGameWithPlayer() {
@@ -120,15 +122,15 @@ function printBoard() {
     console.log(stringBoard);
 }
 
-function placeSoldier(move) {
+function placeSoldier(move, gameProperties) {
     if (algorithm.isValidMove(move)) {
         move.BOARD[move.ROW][move.COL].TURN = move.TURN;
-        if (move.TURN === PURPLE_TURN) {
-            PURPLE_PLAYER.AVAILABLE--;
-            PURPLE_PLAYER.PLACED++;
+        if (move.TURN === common.PURPLE_TURN) {
+            gameProperties.PURPLE_PLAYER.AVAILABLE--;
+            gameProperties.PURPLE_PLAYER.PLACED++;
         } else {
-            YELLOW_PLAYER.AVAILABLE--;
-            YELLOW_PLAYER.PLACED++;
+            gameProperties.YELLOW_PLAYER.AVAILABLE--;
+            gameProperties.YELLOW_PLAYER.PLACED++;
         }
         return true;
     } else {
@@ -137,9 +139,9 @@ function placeSoldier(move) {
     }
 }
 
-function removeSoldier(move) {
+function removeSoldier(move, gameProperties) {
     // When removing, we remove the piece with that color
-    let removingPiece = (move.TURN === PURPLE_TURN) ? PURPLE_PLAYER : YELLOW_PLAYER;
+    let removingPiece = (move.TURN === common.PURPLE_TURN) ? gameProperties.PURPLE_PLAYER : gameProperties.YELLOW_PLAYER;
     if (!algorithm.isRemovable(move)) {
         return false;
     }
@@ -160,15 +162,15 @@ function removeSoldier(move) {
     }
 }
 
-function shiftSoldier(move) {
+function shiftSoldier(move, gameProperties) {
     if (algorithm.isValidShift(move)) {
         // reset state of current
         move.BOARD[move.ROW][move.COL].TURN = null;
         if (move.BOARD[move.ROW][move.COL].ISMILL === true) {
             if (move.TURN === PURPLE_TURN) {
-                PURPLE_PLAYER.MILLPIECES--;
+                gameProperties.PURPLE_PLAYER.MILLPIECES--;
             } else {
-                YELLOW_PLAYER.MILLPIECES--;
+                gameProperties.YELLOW_PLAYER.MILLPIECES--;
             }
             move.BOARD[move.ROW][move.COL].ISMILL = false;
         }
@@ -181,18 +183,18 @@ function shiftSoldier(move) {
     return false;
 }
 
-function handleNewMills(move) {
-    let numMills = algorithm.countNewMills(move);
+function handleNewMills(move, gameProperties) {
+    let numMills = algorithm.countNewMills(move, gameProperties);
     while (numMills > 0) { // Made a mill
         printBoard();
         let message = "";
-        if (GAME_PROPERTIES.TURN === YELLOW_TURN) {
+        if (gameProperties.TURN === common.YELLOW_TURN) {
             message = "Yellow: Enter a position to remove a purple piece in the form of row,col";
         } else {
             message = "Purple: Enter a position to remove a yellow piece in the form of row,col"
         }
 
-        let removingPiece = (((GAME_PROPERTIES.TURN + 1) % 2) === PURPLE_TURN) ? PURPLE_PLAYER : YELLOW_PLAYER;
+        let removingPiece = (((gameProperties.TURN + 1) % 2) === common.PURPLE_TURN) ? gameProperties.PURPLE_PLAYER : gameProperties.YELLOW_PLAYER;
         if (removingPiece.PLACED - removingPiece.MILLPIECES === 0) { // Removing from mill is possible if only mills are left
             message += " that is a mill";
         } else {
@@ -204,10 +206,10 @@ function handleNewMills(move) {
         move = {
             ROW: parseInt(positions[0], 10),
             COL: parseInt(positions[1], 10),
-            TURN: (GAME_PROPERTIES.TURN + 1) % 2,
+            TURN: (gameProperties.TURN + 1) % 2,
             BOARD: move.BOARD
         };
-        if (removeSoldier(move)) {
+        if (removeSoldier(move, gameProperties)) {
             numMills--;
         } else {
             console.log("Invalid remove");
@@ -216,8 +218,8 @@ function handleNewMills(move) {
 }
 
 function phase1() {
-    while (PURPLE_PLAYER.AVAILABLE > 0 || YELLOW_PLAYER.AVAILABLE > 0) {
-        if (GAME_PROPERTIES.TURN === YELLOW_TURN) {
+    while (GAME_PROPERTIES.PURPLE_PLAYER.AVAILABLE > 0 || GAME_PROPERTIES.YELLOW_PLAYER.AVAILABLE > 0) {
+        if (GAME_PROPERTIES.TURN === common.YELLOW_TURN) {
             var positions = prompt("Yellow: Enter a position to place the piece in the form of row,col");
         } else {
             var positions = prompt("Purple: Enter a position to place the piece in the form of row,col");
@@ -230,8 +232,8 @@ function phase1() {
             BOARD: board
         };
 
-        if (placeSoldier(move)) {
-            handleNewMills(move);
+        if (placeSoldier(move, GAME_PROPERTIES)) {
+            handleNewMills(move, GAME_PROPERTIES);
             GAME_PROPERTIES.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
         } else {
             console.log("Invalid place");
@@ -242,8 +244,8 @@ function phase1() {
 }
 
 function phase2() {
-    while (PURPLE_PLAYER.PLACED > 2 && YELLOW_PLAYER.PLACED > 2) {
-        if (GAME_PROPERTIES.TURN === YELLOW_TURN) {
+    while (GAME_PROPERTIES.PURPLE_PLAYER.PLACED > 2 && GAME_PROPERTIES.YELLOW_PLAYER.PLACED > 2) {
+        if (GAME_PROPERTIES.TURN === common.YELLOW_TURN) {
             var positions = prompt("Yellow: Select position of your piece in the form of row,col");
             var direction = prompt("Yellow: Enter 0(left), 1(right), 2(up), or 3(down)");
         } else {
@@ -269,11 +271,11 @@ function phase2() {
             continue;
         }
 
-        if (shiftSoldier(move)) {
+        if (shiftSoldier(move, GAME_PROPERTIES)) {
             // Update row and col for handleNewMills
             move.ROW = move.SHIFTROW;
             move.COL = move.SHIFTCOL;
-            handleNewMills(move);
+            handleNewMills(move, GAME_PROPERTIES);
             GAME_PROPERTIES.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
         } else {
             console.log("Invalid shift");
@@ -307,41 +309,47 @@ function countN(isRow, n, turn, board) {
     return totalCount;
 }
 
-function scoreBoard(turn, board) {
+function scoreBoard(turn, board, gameProperties) {
     return 10*countN(true, 2, turn, board) + 10*countN(false, 2, turn, board) +
         100*countN(true, 3, turn, board) + 100*countN(false, 3, turn, board) +
-        (turn === YELLOW_TURN ? YELLOW_PLAYER.PLACED - PURPLE_PLAYER.PLACED :
-            PURPLE_PLAYER.PLACED - YELLOW_PLAYER.PLACED);
+        (turn === common.YELLOW_TURN ? gameProperties.YELLOW_PLAYER.PLACED - gameProperties.PURPLE_PLAYER.PLACED :
+            gameProperties.PURPLE_PLAYER.PLACED - gameProperties.YELLOW_PLAYER.PLACED);
 }
 
 var bestMove;
 
-function minimax(node, depth, maxPlayer, turn) {
+function minimax(node, depth, maxPlayer, turn, phase1) {
     if (depth === 0) {
         return scoreBoard(turn, node);
     }
 
     if (maxPlayer) {
         let bestValue = -Infinity;
-        let children = getChildren(node, turn);
+        let children = getChildren(node, turn, phase1);
         for (let i = 0; i< children.length; i++) {
             let child = children[i];
-            let value = minimax(child.BOARD, depth-1, false, (turn+1)%2);
+            let value = minimax(child.BOARD, depth-1, false, (turn+1)%2, phase1);
             if (value > bestValue) {
                 bestValue = value;
                 bestMove = {BOARD: node, ROW: child.ROW, COL: child.COL, TURN: turn};
+                if (!phase1) {
+                    bestMove.SHIFT = child.SHIFT;
+                }
             }
         }
         return bestValue;
     } else {
         let bestValue = -Infinity;
-        let children = getChildren(node, turn);
+        let children = getChildren(node, turn, phase1);
         for (let i = 0; i< children.length; i++) {
             let child = children[i];
-            let value = minimax(child.BOARD, depth-1, true, (turn+1)%2);
+            let value = minimax(child.BOARD, depth-1, true, (turn+1)%2, phase1);
             if (value < bestValue) {
                 bestValue = value;
                 bestMove = {BOARD: node, ROW: child.ROW, COL: child.COL, TURN: turn};
+                if (!phase1) {
+                    bestMove.SHIFT = child.SHIFT;
+                }
             }
         }
         return bestValue;
@@ -363,19 +371,97 @@ function cloneBoard(board) {
 }
 
 
-function getChildren(node, turn) {
+function getShiftChildren(board, turn, row, col) {
+    let shiftChildren = [];
+    for (let direction = 0; direction<4; direction++) {
+        let t1 = 0;
+        let t2 = 0;
+        let i = row;
+        let j = col;
+        let rowBounds = [0, 6];
+        let colBounds = [0, 6];
+        if (direction === 0) {
+            t2 = -1;
+        } else if (direction === 1) {
+            t2 = 1;
+        } else if (direction === 2) {
+            t1 = -1;
+        } else if (direction === 3) {
+            t1 = 1;
+        }
+
+        // Special cases for center row/column
+        if (row === algorithm.CENTER_POSITION) {
+            if (col < algorithm.CENTER_POSITION) {
+                colBounds[1] = algorithm.CENTER_POSITION;
+            } else {
+                colBounds[0] = algorithm.CENTER_POSITION;
+            }
+        }
+
+        if (col === algorithm.CENTER_POSITION) {
+            if (row < algorithm.CENTER_POSITION) {
+                rowBounds[1] = algorithm.CENTER_POSITION;
+            } else {
+                rowBounds[0] = algorithm.CENTER_POSITION;
+            }
+        }
+
+        let status = true;
+        while (status) { // Continue moving in a direction
+            i += t1;
+            j += t2;
+
+            if (i < rowBounds[0] || i > rowBounds[1] || j < colBounds[0] || j > colBounds[1]) { // Out of bounds
+                status = false;
+                continue;
+            }
+
+            if (board[i][j].ISAVAILABLE) {
+                if (board[i][j].TURN === null) { // No piece there, we can shift
+                    let clone = cloneBoard(board);
+                    clone[row][col].TURN = null;
+                    clone[i][j].TURN = turn;
+                    shiftChildren.push({
+                        BOARD: clone,
+                        ROW: row,
+                        COL: col,
+                        SHIFT: direction
+                    });
+                }
+                status = false;
+                continue;
+            }
+        }
+    }
+    return shiftChildren;
+}
+
+function getChildren(node, turn, phase1, gameProperties) {
     let children = [];
     for (let row = 0; row < MATRIX_SIZE; row++) {
         for (let col = 0; col < MATRIX_SIZE; col++) {
-            if (board[row][col].ISAVAILABLE && board[row][col].TURN === null) {
-                let clone = cloneBoard(node);
-                clone[row][col].ISAVAILABLE = false;
-                clone[row][col].TURN = turn;
-                children.push({
-                    BOARD: clone,
-                    ROW: row,
-                    COL: col
-                });
+            if (phase1) {
+                if (board[row][col].ISAVAILABLE && board[row][col].TURN === null) {
+                    let clone = cloneBoard(node);
+                    // TODO finish moving place and handle and return board
+                    placeSoldier(move, gameProperties);
+                    handleNewMillsComputer(move, gameProperties);
+                    clone[row][col].TURN = turn;
+                    children.push({
+                        BOARD: clone,
+                        ROW: row,
+                        COL: col
+                    });
+                }
+            } else {
+                if (board[row][col].ISAVAILABLE && board[row][col].TURN === turn) {
+                    let shiftChildren = getShiftChildren(node, turn, row, col);
+                    for (let i= 0; i<shiftChildren.length; i++) {
+                        // TODO finish moving shift and handle here
+                        children.push(shiftChildren[i]);
+                    }
+                }
             }
         }
     }
@@ -385,13 +471,13 @@ function getChildren(node, turn) {
 
 var computerTurn = false;
 
-function handleNewMillsComputer(move) {
-    let numMills = algorithm.countNewMills(move);
-    move.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
+function handleNewMillsComputer(move, gameProperties) {
+    let numMills = algorithm.countNewMills(move, gameProperties);
+    move.TURN = (gameProperties.TURN + 1) % 2;
     while(numMills > 0) {
         let removeMillPiece = false;
 
-        let removingPiece = (move.TURN === PURPLE_TURN) ? PURPLE_PLAYER : YELLOW_PLAYER;
+        let removingPiece = (move.TURN === common.PURPLE_TURN) ? gameProperties.PURPLE_PLAYER : gameProperties.YELLOW_PLAYER;
         if (removingPiece.PLACED - removingPiece.MILLPIECES === 0) { // Removing from mill is possible if only mills are left
             removeMillPiece = true;
         }
@@ -403,7 +489,7 @@ function handleNewMillsComputer(move) {
                 if (algorithm.isRemovable(move))  {
                     if ((removeMillPiece && move.BOARD[move.ROW][move.COL].ISMILL) ||
                         (!removeMillPiece && !move.BOARD[move.ROW][move.COL].ISMILL)) {
-                        removeSoldier(move);
+                        removeSoldier(move, gameProperties);
                         --numMills;
                         // Break out of both loops
                         row = MATRIX_SIZE;
@@ -417,13 +503,14 @@ function handleNewMillsComputer(move) {
 
 
 function phase1WithComputer() {
-    while (PURPLE_PLAYER.AVAILABLE > 0 || YELLOW_PLAYER.AVAILABLE > 0) {
+    while (GAME_PROPERTIES.PURPLE_PLAYER.AVAILABLE > 0 || GAME_PROPERTIES.YELLOW_PLAYER.AVAILABLE > 0) {
         if (computerTurn) {
-            minimax(board, 3, true, GAME_PROPERTIES.TURN);
+            minimax(board, 3, true, GAME_PROPERTIES.TURN, true);
             // Need to ensure BOARD has reference to actual board
             bestMove.BOARD = board;
-            if (placeSoldier(bestMove)) {
-                handleNewMillsComputer(bestMove);
+            if (placeSoldier(bestMove, GAME_PROPERTIES)) {
+                // TODO Move placeSoldier and handle new mills to minimax ago
+                handleNewMillsComputer(bestMove, GAME_PROPERTIES);
                 GAME_PROPERTIES.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
                 printBoard();
                 computerTurn = !computerTurn;
@@ -431,7 +518,7 @@ function phase1WithComputer() {
                 console.log("Invalid place");
             }
         } else {
-            if (GAME_PROPERTIES.TURN === YELLOW_TURN) {
+            if (GAME_PROPERTIES.TURN === common.YELLOW_TURN) {
                 var positions = prompt("Yellow: Enter a position to place the piece in the form of row,col");
             } else {
                 var positions = prompt("Purple: Enter a position to place the piece in the form of row,col");
@@ -444,8 +531,8 @@ function phase1WithComputer() {
                 BOARD: board
             };
 
-            if (placeSoldier(move)) {
-                handleNewMills(move);
+            if (placeSoldier(move, GAME_PROPERTIES)) {
+                handleNewMills(move, GAME_PROPERTIES);
                 GAME_PROPERTIES.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
                 printBoard();
                 computerTurn = !computerTurn;
@@ -457,12 +544,78 @@ function phase1WithComputer() {
     }
 }
 
+function phase2WithComputer() {
+    while (GAME_PROPERTIES.PURPLE_PLAYER.PLACED > 2 && GAME_PROPERTIES.YELLOW_PLAYER.PLACED > 2) {
+        if (computerTurn) {
+            minimax(board, 3, true, GAME_PROPERTIES.TURN, false);
+            // Need to ensure BOARD has reference to actual board
+            bestMove.BOARD = board;
+            if (shiftSoldier(bestMove, GAME_PROPERTIES)) {
+                // TODO move handle new mills and shift to minimax
+                handleNewMillsComputer(bestMove, GAME_PROPERTIES);
+                GAME_PROPERTIES.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
+                printBoard();
+                computerTurn = !computerTurn;
+            } else {
+                console.log("Invalid shift");
+            }
+
+        } else {
+            if (GAME_PROPERTIES.TURN === common.YELLOW_TURN) {
+                var positions = prompt("Yellow: Select position of your piece in the form of row,col");
+                var direction = prompt("Yellow: Enter 0(left), 1(right), 2(up), or 3(down)");
+            } else {
+                var positions = prompt("Purple: Select position of your piece in the form of row,col");
+                var direction = prompt("Purple: Enter 0(left), 1(right), 2(up), or 3(down)");
+            }
+            positions = positions.split(",");
+
+            // Set up move for shift
+            let move = {
+                ROW: parseInt(positions[0], 10),
+                COL: parseInt(positions[1], 10),
+                TURN: GAME_PROPERTIES.TURN,
+                BOARD: board,
+                SHIFT: parseInt(direction, 10),
+                SHIFTROW: null,
+                SHIFTCOL: null
+            };
+
+            if (move.BOARD[move.ROW][move.COL].TURN !== GAME_PROPERTIES.TURN) {
+                // Not your color
+                console.log("Invalid piece chosen");
+                continue;
+            }
+
+            if (shiftSoldier(move, GAME_PROPERTIES)) {
+                // Update row and col for handleNewMills
+                move.ROW = move.SHIFTROW;
+                move.COL = move.SHIFTCOL;
+                handleNewMills(move, GAME_PROPERTIES);
+                GAME_PROPERTIES.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
+                computerTurn = !computerTurn;
+            } else {
+                console.log("Invalid shift");
+            }
+
+            printBoard();
+        }
+    }
+}
+
 function startGameWithComputer() {
     init();
     GAME_PROPERTIES.TURN = coinFlip();
     printBoard();
     console.log("Phase1");
     phase1WithComputer();
+    console.log("Phase2");
+    phase2WithComputer();
+    if (checkLose() === common.PURPLE_TURN) {
+        console.log("Yellow Wins");
+    } else {
+        console.log("Purple Wins");
+    }
 }
 
 // startGameWithPlayer();

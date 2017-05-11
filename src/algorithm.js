@@ -1,32 +1,32 @@
-import {PURPLE_PLAYER, YELLOW_PLAYER, PURPLE_TURN, YELLOW_TURN} from './common.js';
+import {PURPLE_TURN, YELLOW_TURN} from './common.js';
 
 const CENTER_POSITION = 3;
 
-function countNewMills(move) {
+function countNewMills(move, gameProperties) {
     if (move.ROW === CENTER_POSITION) {
         if (move.COL < CENTER_POSITION) {
-            return checkMill(move, 0, 2, true) +
-                checkMill(move, 0, 6, false);
+            return checkMill(move, 0, 2, true, gameProperties) +
+                checkMill(move, 0, 6, false, gameProperties);
         } else {
-            return checkMill(move, 4, 6, true) +
-                checkMill(move, 0, 6, false);
+            return checkMill(move, 4, 6, true, gameProperties) +
+                checkMill(move, 0, 6, false, gameProperties);
         }
     }
 
     if (move.COL === CENTER_POSITION) {
         if (move.ROW < CENTER_POSITION) {
-            return checkMill(move, 0, 6, true) +
-                checkMill(move, 0, 2, false);
+            return checkMill(move, 0, 6, true, gameProperties) +
+                checkMill(move, 0, 2, false, gameProperties);
         } else {
-            return checkMill(move, 0, 6, true) +
-                checkMill(move, 4, 6, false);
+            return checkMill(move, 0, 6, true, gameProperties) +
+                checkMill(move, 4, 6, false, gameProperties);
         }
     }
 
-    return checkMill(move, 0, 6, true) + checkMill(move, 0, 6, false);
+    return checkMill(move, 0, 6, true, gameProperties) + checkMill(move, 0, 6, false, gameProperties);
 }
 
-function checkMill(move, start, end, checkRow) {
+function checkMill(move, start, end, checkRow, gameProperties) {
     let count = 0;
     for (let i = start; i <= end; i++) {
         let tileState = checkRow ? move.BOARD[move.ROW][i] : move.BOARD[i][move.COL];
@@ -41,9 +41,9 @@ function checkMill(move, start, end, checkRow) {
             if (tileState.ISAVAILABLE === true && tileState.ISMILL === false) {
                 tileState.ISMILL = true;
                 if (move.TURN === YELLOW_TURN) {
-                    YELLOW_PLAYER.MILLPIECES += 1;
+                    gameProperties.YELLOW_PLAYER.MILLPIECES += 1;
                 } else if (move.TURN === PURPLE_TURN) {
-                    PURPLE_PLAYER.MILLPIECES += 1;
+                    gameProperties.PURPLE_PLAYER.MILLPIECES += 1;
                 }
             }
         }
@@ -147,5 +147,5 @@ function isValidShift(move) {
     }
 }
 
-export {countNewMills, isValidMove, isRemovable, isValidShift};
+export {countNewMills, isValidMove, isRemovable, isValidShift, CENTER_POSITION};
 
