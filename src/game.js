@@ -78,7 +78,7 @@ function coinFlip() {
     return Math.floor(Math.random() * 2);
 }
 
-const GAME_PROPERTIES = {
+var GAME_PROPERTIES = {
     TURN: null,
     CAPTURING: false,
     MILLS: 0,
@@ -329,7 +329,7 @@ function minimax(board, depth, maxPlayer, turn, phase1, gameProperties) {
         let children = getChildren(board, turn, phase1, gameProperties);
         for (let i = 0; i< children.length; i++) {
             let child = children[i];
-            let value = minimax(child, depth-1, false, (turn+1)%2, phase1, gameProperties);
+            let value = minimax(child.BOARD, depth-1, false, (turn+1)%2, phase1, gameProperties);
             if (value > bestValue) {
                 bestValue = value;
                 bestBoards = [];
@@ -342,7 +342,7 @@ function minimax(board, depth, maxPlayer, turn, phase1, gameProperties) {
         let children = getChildren(board, turn, phase1, gameProperties);
         for (let i = 0; i< children.length; i++) {
             let child = children[i];
-            let value = minimax(child, depth-1, true, (turn+1)%2, phase1, gameProperties);
+            let value = minimax(child.BOARD, depth-1, true, (turn+1)%2, phase1, gameProperties);
             if (value < bestValue) {
                 bestValue = value;
                 bestBoards = [];
@@ -449,14 +449,23 @@ function getChildren(board, turn, phase1, gameProperties) {
 
                     placeSoldier(move, copyGameProperties);
                     handleNewMillsComputer(move, copyGameProperties);
-                    children.push(copyBoard);
+                    children.push({BOARD: copyBoard, PROPERTIES: copyGameProperties});
                 }
             } else {
                 if (board[row][col].ISAVAILABLE && board[row][col].TURN === turn) {
-                    let shiftChildren = getShiftChildren(board, turn, row, col);
-                    for (let i= 0; i<shiftChildren.length; i++) {
-                        // TODO finish moving shift and handle here
-                        children.push(shiftChildren[i]);
+                    for (let i = 0; i<4; i++) {
+                        let copyBoard = cloneBoard(board);
+                        let copyGameProperties = cloneGameProperties(gameProperties);
+                        let move = {ROW: row, COL: col, BOARD: copyBoard, TURN: turn};
+
+                        move.SHIFT = i;
+                        if (shiftSoldier(move, copyGameProperties)) {
+                            // Update row and col for handleNewMills
+                            move.ROW = move.SHIFTROW;
+                            move.COL = move.SHIFTCOL;
+                            handleNewMillsComputer(move, copyGameProperties);
+                            children.push({BOARD: copyBoard, PROPERTIES: copyGameProperties});
+                        }
                     }
                 }
             }
@@ -491,10 +500,6 @@ function handleNewMillsComputer(move, gameProperties) {
                         // Break out of both loops
                         row = MATRIX_SIZE;
                         col = MATRIX_SIZE;
-                    } else {
-                        // console.log(move);
-                        // console.log(move.BOARD);
-                        // console.log(removeMillPiece);
                     }
                 }
             }
@@ -507,8 +512,9 @@ function phase1WithComputer() {
     while (GAME_PROPERTIES.PURPLE_PLAYER.AVAILABLE > 0 || GAME_PROPERTIES.YELLOW_PLAYER.AVAILABLE > 0) {
         if (computerTurn) {
             bestBoards = [];
-            minimax(board, 1, true, GAME_PROPERTIES.TURN, true, GAME_PROPERTIES);
-            board = bestBoards[bestBoards.length-1];
+            minimax(board, 2, true, GAME_PROPERTIES.TURN, true, GAME_PROPERTIES);
+            board = bestBoards[bestBoards.length-1].BOARD;
+            GAME_PROPERTIES = bestBoards[bestBoards.length-1].PROPERTIES;
             GAME_PROPERTIES.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
             printBoard();
             computerTurn = !computerTurn;
@@ -542,19 +548,13 @@ function phase1WithComputer() {
 function phase2WithComputer() {
     while (GAME_PROPERTIES.PURPLE_PLAYER.PLACED > 2 && GAME_PROPERTIES.YELLOW_PLAYER.PLACED > 2) {
         if (computerTurn) {
-            minimax(board, 3, true, GAME_PROPERTIES.TURN, false, GAME_PROPERTIES);
-            // Need to ensure BOARD has reference to actual board
-            bestBoard.BOARD = board;
-            if (shiftSoldier(bestBoard, GAME_PROPERTIES)) {
-                // TODO move handle new mills and shift to minimax
-                handleNewMillsComputer(bestBoard, GAME_PROPERTIES);
-                GAME_PROPERTIES.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
-                printBoard();
-                computerTurn = !computerTurn;
-            } else {
-                console.log("Invalid shift");
-            }
-
+            bestBoards = [];
+            minimax(board, 2, true, GAME_PROPERTIES.TURN, false, GAME_PROPERTIES);
+            board = bestBoards[bestBoards.length-1].BOARD;
+            GAME_PROPERTIES = bestBoards[bestBoards.length-1].PROPERTIES;
+            GAME_PROPERTIES.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
+            printBoard();
+            computerTurn = !computerTurn;
         } else {
             if (GAME_PROPERTIES.TURN === common.YELLOW_TURN) {
                 var positions = prompt("Yellow: Select position of your piece in the form of row,col");

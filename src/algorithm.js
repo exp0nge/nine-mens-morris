@@ -84,7 +84,7 @@ function isValidShift(move) {
 
     // Make sure that there is a piece to move
     if (!move.BOARD[move.ROW][move.COL].ISAVAILABLE) {
-        console.log("1");
+        // console.log("1");
         return false;
     }
 
@@ -103,7 +103,7 @@ function isValidShift(move) {
             t1 = 1;
             break;
         default:
-            console.log("2");
+            // console.log("2");
             return false;
     }
 
@@ -129,7 +129,7 @@ function isValidShift(move) {
         j += t2;
 
         if (i < rowBounds[0] || i > rowBounds[1] || j < colBounds[0] || j > colBounds[1]) { // Out of bounds
-            console.log("3");
+            // console.log("3");
             return false;
         }
 
@@ -139,8 +139,8 @@ function isValidShift(move) {
                 move.SHIFTCOL = j;
                 return true;
             } else {
-                console.log(move);
-                console.log("4");
+                // console.log(move);
+                // console.log("4");
                 return false;
             }
         }
