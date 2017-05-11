@@ -311,45 +311,55 @@ function countN(isRow, n, turn, board) {
 }
 
 function scoreBoard(turn, board, gameProperties) {
-    return 10*countN(true, 2, turn, board) + 10*countN(false, 2, turn, board) +
-        100*countN(true, 3, turn, board) + 100*countN(false, 3, turn, board) +
+    return countN(true, 2, turn, board) + countN(false, 2, turn, board) +
+        10 * countN(true, 3, turn, board) + 10 * countN(false, 3, turn, board) +
         (turn === common.YELLOW_TURN ? gameProperties.YELLOW_PLAYER.PLACED - gameProperties.PURPLE_PLAYER.PLACED :
             gameProperties.PURPLE_PLAYER.PLACED - gameProperties.YELLOW_PLAYER.PLACED);
 }
 
-var bestBoards;
-
 function minimax(board, depth, maxPlayer, turn, phase1, gameProperties) {
     if (depth === 0) {
-        return scoreBoard(turn, board, gameProperties);
+        return {
+            VALUE: scoreBoard(turn, board, gameProperties),
+            BOARD: board,
+            PROPERTIES: gameProperties
+        };
     }
 
     if (maxPlayer) {
-        let bestValue = -Infinity;
+        let bestM = {
+            VALUE: -Infinity,
+            BOARD: null,
+            PROPERTIES: null
+        };
         let children = getChildren(board, turn, phase1, gameProperties);
         for (let i = 0; i< children.length; i++) {
             let child = children[i];
-            let value = minimax(child.BOARD, depth-1, false, (turn+1)%2, phase1, gameProperties);
-            if (value > bestValue) {
-                bestValue = value;
-                bestBoards = [];
+            let m = minimax(child.BOARD, depth-1, false, (turn+1)%2, phase1, gameProperties);
+            if (m.VALUE > bestM.VALUE) {
+                bestM.VALUE = m.VALUE;
+                bestM.BOARD = child.BOARD;
+                bestM.PROPERTIES = child.PROPERTIES;
             }
-            bestBoards.push(child);
         }
-        return bestValue;
+        return bestM;
     } else {
-        let bestValue = -Infinity;
+        let bestM = {
+            VALUE: Infinity,
+            BOARD: null,
+            PROPERTIES: null
+        };
         let children = getChildren(board, turn, phase1, gameProperties);
         for (let i = 0; i< children.length; i++) {
             let child = children[i];
-            let value = minimax(child.BOARD, depth-1, true, (turn+1)%2, phase1, gameProperties);
-            if (value < bestValue) {
-                bestValue = value;
-                bestBoards = [];
+            let m = minimax(child.BOARD, depth-1, true, (turn+1)%2, phase1, gameProperties);
+            if (m.VALUE < bestM.VALUE) {
+                bestM.VALUE = m.VALUE;
+                bestM.BOARD = child.BOARD;
+                bestM.PROPERTIES = child.PROPERTIES;
             }
-            bestBoards.push(child);
         }
-        return bestValue;
+        return bestM;
     }
 
 
@@ -371,71 +381,6 @@ function cloneGameProperties(gameProperties){
     return JSON.parse(JSON.stringify(gameProperties));
 }
 
-
-function getShiftChildren(board, turn, row, col) {
-    let shiftChildren = [];
-    for (let direction = 0; direction<4; direction++) {
-        let t1 = 0;
-        let t2 = 0;
-        let i = row;
-        let j = col;
-        let rowBounds = [0, 6];
-        let colBounds = [0, 6];
-        if (direction === 0) {
-            t2 = -1;
-        } else if (direction === 1) {
-            t2 = 1;
-        } else if (direction === 2) {
-            t1 = -1;
-        } else if (direction === 3) {
-            t1 = 1;
-        }
-
-        // Special cases for center row/column
-        if (row === algorithm.CENTER_POSITION) {
-            if (col < algorithm.CENTER_POSITION) {
-                colBounds[1] = algorithm.CENTER_POSITION;
-            } else {
-                colBounds[0] = algorithm.CENTER_POSITION;
-            }
-        }
-
-        if (col === algorithm.CENTER_POSITION) {
-            if (row < algorithm.CENTER_POSITION) {
-                rowBounds[1] = algorithm.CENTER_POSITION;
-            } else {
-                rowBounds[0] = algorithm.CENTER_POSITION;
-            }
-        }
-
-        let status = true;
-        while (status) { // Continue moving in a direction
-            i += t1;
-            j += t2;
-
-            if (i < rowBounds[0] || i > rowBounds[1] || j < colBounds[0] || j > colBounds[1]) { // Out of bounds
-                status = false;
-                continue;
-            }
-
-            if (board[i][j].ISAVAILABLE) {
-                if (board[i][j].TURN === null) { // No piece there, we can shift
-                    let clone = cloneBoard(board);
-                    clone[row][col].TURN = null;
-                    clone[i][j].TURN = turn;
-                    shiftChildren.push({
-                        BOARD: clone,
-                        ROW: row,
-                        COL: col,
-                        SHIFT: direction
-                    });
-                }
-                status = false;
-            }
-        }
-    }
-    return shiftChildren;
-}
 
 function getChildren(board, turn, phase1, gameProperties) {
     let children = [];
@@ -511,10 +456,9 @@ function handleNewMillsComputer(move, gameProperties) {
 function phase1WithComputer() {
     while (GAME_PROPERTIES.PURPLE_PLAYER.AVAILABLE > 0 || GAME_PROPERTIES.YELLOW_PLAYER.AVAILABLE > 0) {
         if (computerTurn) {
-            bestBoards = [];
-            minimax(board, 2, true, GAME_PROPERTIES.TURN, true, GAME_PROPERTIES);
-            board = bestBoards[bestBoards.length-1].BOARD;
-            GAME_PROPERTIES = bestBoards[bestBoards.length-1].PROPERTIES;
+            let bestM = minimax(board, 2, true, GAME_PROPERTIES.TURN, true, GAME_PROPERTIES);
+            board = bestM.BOARD;
+            GAME_PROPERTIES = bestM.PROPERTIES;
             GAME_PROPERTIES.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
             printBoard();
             computerTurn = !computerTurn;
@@ -548,10 +492,9 @@ function phase1WithComputer() {
 function phase2WithComputer() {
     while (GAME_PROPERTIES.PURPLE_PLAYER.PLACED > 2 && GAME_PROPERTIES.YELLOW_PLAYER.PLACED > 2) {
         if (computerTurn) {
-            bestBoards = [];
-            minimax(board, 2, true, GAME_PROPERTIES.TURN, false, GAME_PROPERTIES);
-            board = bestBoards[bestBoards.length-1].BOARD;
-            GAME_PROPERTIES = bestBoards[bestBoards.length-1].PROPERTIES;
+            let bestM = minimax(board, 2, true, GAME_PROPERTIES.TURN, false, GAME_PROPERTIES);
+            board = bestM.BOARD;
+            GAME_PROPERTIES = bestM.PROPERTIES;
             GAME_PROPERTIES.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
             printBoard();
             computerTurn = !computerTurn;
