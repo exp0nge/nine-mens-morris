@@ -30,7 +30,7 @@ function checkMill(move, start, end, checkRow) {
     let count = 0;
     for (let i = start; i <= end; i++) {
         let tileState = checkRow ? move.BOARD[move.ROW][i] : move.BOARD[i][move.COL];
-        if (tileState.ISAVAILABLE === true && tileState.COLOR === move.COLOR) {
+        if (tileState.ISAVAILABLE === true && tileState.TURN === move.TURN) {
             count += 1;
         }
     }
@@ -40,9 +40,9 @@ function checkMill(move, start, end, checkRow) {
             let tileState = checkRow ? move.BOARD[move.ROW][i] : move.BOARD[i][move.COL];
             if (tileState.ISAVAILABLE === true && tileState.ISMILL === false) {
                 tileState.ISMILL = true;
-                if (move.COLOR === YELLOW_TURN) {
+                if (move.TURN === YELLOW_TURN) {
                     YELLOW_PLAYER.MILLPIECES += 1;
-                } else if (move.COLOR === PURPLE_TURN) {
+                } else if (move.TURN === PURPLE_TURN) {
                     PURPLE_PLAYER.MILLPIECES += 1;
                 }
             }
@@ -55,13 +55,13 @@ function checkMill(move, start, end, checkRow) {
 
 function isValidMove(move) {
     let tileState = move.BOARD[move.ROW][move.COL];
-    return (tileState.ISAVAILABLE && tileState.COLOR === null);
+    return (tileState.ISAVAILABLE && tileState.TURN === null);
 }
 
 function isRemovable(move) {
     // Is not part of a mill and has a piece
     let tileState = move.BOARD[move.ROW][move.COL];
-    return (tileState.ISAVAILABLE && tileState.COLOR === move.COLOR);
+    return (tileState.ISAVAILABLE && tileState.TURN === move.TURN);
 }
 
 /**
@@ -134,7 +134,7 @@ function isValidShift(move) {
         }
 
         if (move.BOARD[i][j].ISAVAILABLE) {
-            if (move.BOARD[i][j].COLOR === null) { // No piece there, we can shift
+            if (move.BOARD[i][j].TURN === null) { // No piece there, we can shift
                 move.SHIFTROW = i;
                 move.SHIFTCOL = j;
                 return true;
