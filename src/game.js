@@ -87,8 +87,14 @@ var GAME_PROPERTIES = {
 };
 
 function checkLose(gameProperties) {
-    if (gameProperties.PURPLE_PLAYER.PLACED < 3) return common.PURPLE_TURN;
-    if (gameProperties.YELLOW_PLAYER.PLACED < 3) return common.YELLOW_TURN;
+    if (gameProperties.PURPLE_PLAYER.PLACED < 3 && gameProperties.PURPLE_PLAYER.AVAILABLE === 0) {
+        return common.PURPLE_TURN;
+    } else if (gameProperties.YELLOW_PLAYER.PLACED < 3 && gameProperties.YELLOW_PLAYER.AVAILABLE === 0) {
+        return common.YELLOW_TURN;
+    } else {
+        return null;
+    }
+
 }
 
 function startGameWithPlayer() {
@@ -99,7 +105,7 @@ function startGameWithPlayer() {
     phase1();
     console.log("Phase2");
     phase2();
-    if (checkLose() === common.PURPLE_TURN) {
+    if (checkLose(GAME_PROPERTIES) === common.PURPLE_TURN) {
         console.log("Yellow Wins");
     } else {
         console.log("Purple Wins");
@@ -286,8 +292,6 @@ function phase2() {
     }
 }
 
-console.log("initializing game");
-
 function countN(isRow, n, turn, board) {
     let totalCount = 0;
     for (let row = 0; row < MATRIX_SIZE; row++) {
@@ -326,7 +330,7 @@ function scoreBoard(turn, board, gameProperties) {
 }
 
 function minimax(board, depth, maxPlayer, turn, phase1, gameProperties) {
-    if (depth === 0) {
+    if (depth === 0 || (checkLose(gameProperties) !== null)) {
         return {
             VALUE: scoreBoard(turn, board, gameProperties),
             BOARD: board,
@@ -343,7 +347,7 @@ function minimax(board, depth, maxPlayer, turn, phase1, gameProperties) {
         let children = getChildren(board, turn, phase1, gameProperties);
         for (let i = 0; i< children.length; i++) {
             let child = children[i];
-            let m = minimax(child.BOARD, depth-1, false, (turn+1)%2, phase1, gameProperties);
+            let m = minimax(child.BOARD, depth-1, false, (turn+1)%2, phase1, child.PROPERTIES);
             if (m.VALUE > bestM.VALUE) {
                 bestM.VALUE = m.VALUE;
                 bestM.BOARD = child.BOARD;
@@ -360,7 +364,7 @@ function minimax(board, depth, maxPlayer, turn, phase1, gameProperties) {
         let children = getChildren(board, turn, phase1, gameProperties);
         for (let i = 0; i< children.length; i++) {
             let child = children[i];
-            let m = minimax(child.BOARD, depth-1, true, (turn+1)%2, phase1, gameProperties);
+            let m = minimax(child.BOARD, depth-1, true, (turn+1)%2, phase1, child.PROPERTIES);
             if (m.VALUE < bestM.VALUE) {
                 bestM.VALUE = m.VALUE;
                 bestM.BOARD = child.BOARD;
