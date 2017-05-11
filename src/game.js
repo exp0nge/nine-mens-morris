@@ -316,7 +316,7 @@ function scoreBoard(turn, board, gameProperties) {
             gameProperties.PURPLE_PLAYER.PLACED - gameProperties.YELLOW_PLAYER.PLACED);
 }
 
-var bestBoard;
+var bestBoards;
 
 function minimax(board, depth, maxPlayer, turn, phase1, gameProperties) {
     if (depth === 0) {
@@ -331,8 +331,8 @@ function minimax(board, depth, maxPlayer, turn, phase1, gameProperties) {
             let value = minimax(child, depth-1, false, (turn+1)%2, phase1, gameProperties);
             if (value > bestValue) {
                 bestValue = value;
-                bestBoard = child;
             }
+            bestBoards.push(child);
         }
         return bestValue;
     } else {
@@ -343,8 +343,9 @@ function minimax(board, depth, maxPlayer, turn, phase1, gameProperties) {
             let value = minimax(child, depth-1, true, (turn+1)%2, phase1, gameProperties);
             if (value < bestValue) {
                 bestValue = value;
-                bestBoard = child;
+                bestBoards = [];
             }
+            bestBoards.push(child);
         }
         return bestValue;
     }
@@ -489,9 +490,9 @@ function handleNewMillsComputer(move, gameProperties) {
                         row = MATRIX_SIZE;
                         col = MATRIX_SIZE;
                     } else {
-                        console.log(move);
+                        // console.log(move);
                         // console.log(move.BOARD);
-                        console.log(removeMillPiece);
+                        // console.log(removeMillPiece);
                     }
                 }
             }
@@ -503,8 +504,9 @@ function handleNewMillsComputer(move, gameProperties) {
 function phase1WithComputer() {
     while (GAME_PROPERTIES.PURPLE_PLAYER.AVAILABLE > 0 || GAME_PROPERTIES.YELLOW_PLAYER.AVAILABLE > 0) {
         if (computerTurn) {
+            bestBoards = [];
             minimax(board, 3, true, GAME_PROPERTIES.TURN, true, GAME_PROPERTIES);
-            board = bestBoard;
+            board = bestBoards[bestBoards.length-1];
             GAME_PROPERTIES.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
             printBoard();
             computerTurn = !computerTurn;
