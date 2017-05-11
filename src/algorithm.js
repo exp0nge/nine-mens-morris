@@ -58,10 +58,10 @@ function isValidMove(move) {
     return (tileState.ISAVAILABLE && tileState.TURN === null);
 }
 
-function isRemovable(move) {
+function isRemovable(move, otherTurn) {
     // Is not part of a mill and has a piece
     let tileState = move.BOARD[move.ROW][move.COL];
-    return (tileState.ISAVAILABLE && tileState.TURN === move.TURN);
+    return (tileState.ISAVAILABLE && tileState.TURN === otherTurn);
 }
 
 /**

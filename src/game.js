@@ -139,10 +139,10 @@ function placeSoldier(move, gameProperties) {
     }
 }
 
-function removeSoldier(move, gameProperties) {
+function removeSoldier(move, gameProperties, otherTurn) {
     // When removing, we remove the piece with that color
-    let removingPiece = (move.TURN === common.PURPLE_TURN) ? gameProperties.PURPLE_PLAYER : gameProperties.YELLOW_PLAYER;
-    if (!algorithm.isRemovable(move)) {
+    let removingPiece = (otherTurn === common.PURPLE_TURN) ? gameProperties.PURPLE_PLAYER : gameProperties.YELLOW_PLAYER;
+    if (!algorithm.isRemovable(move, otherTurn)) {
         return false;
     }
 
@@ -194,7 +194,8 @@ function handleNewMills(move, gameProperties) {
             message = "Purple: Enter a position to remove a yellow piece in the form of row,col"
         }
 
-        let removingPiece = (((gameProperties.TURN + 1) % 2) === common.PURPLE_TURN) ? gameProperties.PURPLE_PLAYER : gameProperties.YELLOW_PLAYER;
+        let otherTurn = (gameProperties.TURN + 1) % 2;
+        let removingPiece = otherTurn === common.PURPLE_TURN ? gameProperties.PURPLE_PLAYER : gameProperties.YELLOW_PLAYER;
         if (removingPiece.PLACED > 0  && removingPiece.PLACED - removingPiece.MILLPIECES === 0) { // Removing from mill is possible if only mills are left
             message += " that is a mill";
         } else {
@@ -209,7 +210,7 @@ function handleNewMills(move, gameProperties) {
             TURN: (gameProperties.TURN + 1) % 2,
             BOARD: move.BOARD
         };
-        if (removeSoldier(move, gameProperties)) {
+        if (removeSoldier(move, gameProperties, otherTurn)) {
             numMills--;
         } else {
             console.log("Invalid remove");
@@ -331,6 +332,7 @@ function minimax(board, depth, maxPlayer, turn, phase1, gameProperties) {
             let value = minimax(child, depth-1, false, (turn+1)%2, phase1, gameProperties);
             if (value > bestValue) {
                 bestValue = value;
+                bestBoards = [];
             }
             bestBoards.push(child);
         }
@@ -468,11 +470,11 @@ var computerTurn = false;
 
 function handleNewMillsComputer(move, gameProperties) {
     let numMills = algorithm.countNewMills(move, gameProperties);
-    move.TURN = (gameProperties.TURN + 1) % 2;
+    let otherTurn = (move.TURN + 1) % 2;
     while(numMills > 0 && !checkLose(gameProperties)) {
         let removeMillPiece = false;
 
-        let removingPiece = (move.TURN === common.PURPLE_TURN) ? gameProperties.PURPLE_PLAYER : gameProperties.YELLOW_PLAYER;
+        let removingPiece = (otherTurn === common.PURPLE_TURN) ? gameProperties.PURPLE_PLAYER : gameProperties.YELLOW_PLAYER;
         if (removingPiece.PLACED > 0 && removingPiece.PLACED - removingPiece.MILLPIECES === 0) { // Removing from mill is possible if only mills are left
             removeMillPiece = true;
         }
@@ -481,10 +483,10 @@ function handleNewMillsComputer(move, gameProperties) {
             for (let col = 0; col < MATRIX_SIZE; col++) {
                 move.ROW = row;
                 move.COL = col;
-                if (algorithm.isRemovable(move))  {
+                if (algorithm.isRemovable(move, otherTurn))  {
                     if ((removeMillPiece && move.BOARD[move.ROW][move.COL].ISMILL) ||
                         (!removeMillPiece && !move.BOARD[move.ROW][move.COL].ISMILL)) {
-                        removeSoldier(move, gameProperties);
+                        removeSoldier(move, gameProperties, otherTurn);
                         --numMills;
                         // Break out of both loops
                         row = MATRIX_SIZE;
@@ -505,7 +507,7 @@ function phase1WithComputer() {
     while (GAME_PROPERTIES.PURPLE_PLAYER.AVAILABLE > 0 || GAME_PROPERTIES.YELLOW_PLAYER.AVAILABLE > 0) {
         if (computerTurn) {
             bestBoards = [];
-            minimax(board, 3, true, GAME_PROPERTIES.TURN, true, GAME_PROPERTIES);
+            minimax(board, 1, true, GAME_PROPERTIES.TURN, true, GAME_PROPERTIES);
             board = bestBoards[bestBoards.length-1];
             GAME_PROPERTIES.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
             printBoard();
