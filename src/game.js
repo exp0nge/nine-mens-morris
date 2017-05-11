@@ -468,7 +468,7 @@ function handleNewMillsComputer(move, gameProperties) {
 function phase1WithComputer() {
     while (GAME_PROPERTIES.PURPLE_PLAYER.AVAILABLE > 0 || GAME_PROPERTIES.YELLOW_PLAYER.AVAILABLE > 0) {
         if (computerTurn) {
-            let bestM = minimax(board, 2, true, GAME_PROPERTIES.TURN, true, GAME_PROPERTIES);
+            let bestM = minimax(board, 3, true, GAME_PROPERTIES.TURN, true, GAME_PROPERTIES);
             board = bestM.BOARD;
             GAME_PROPERTIES = bestM.PROPERTIES;
             GAME_PROPERTIES.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
@@ -504,7 +504,7 @@ function phase1WithComputer() {
 function phase2WithComputer() {
     while (GAME_PROPERTIES.PURPLE_PLAYER.PLACED > 2 && GAME_PROPERTIES.YELLOW_PLAYER.PLACED > 2) {
         if (computerTurn) {
-            let bestM = minimax(board, 2, true, GAME_PROPERTIES.TURN, false, GAME_PROPERTIES);
+            let bestM = minimax(board, 3, true, GAME_PROPERTIES.TURN, false, GAME_PROPERTIES);
             board = bestM.BOARD;
             GAME_PROPERTIES = bestM.PROPERTIES;
             GAME_PROPERTIES.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
