@@ -311,6 +311,14 @@ function countN(isRow, n, turn, board) {
 }
 
 function scoreBoard(turn, board, gameProperties) {
+    if (checkLose(gameProperties) !== null) {
+        if (checkLose(gameProperties) === turn) {
+            return -Infinity;
+        } else {
+            return Infinity;
+        }
+    }
+
     return countN(true, 2, turn, board) + countN(false, 2, turn, board) +
         10 * countN(true, 3, turn, board) + 10 * countN(false, 3, turn, board) +
         (turn === common.YELLOW_TURN ? gameProperties.YELLOW_PLAYER.PLACED - gameProperties.PURPLE_PLAYER.PLACED :
