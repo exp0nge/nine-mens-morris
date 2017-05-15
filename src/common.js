@@ -1,13 +1,15 @@
 const PURPLE_PLAYER = {
     AVAILABLE: 4,
     PLACED: 0,
-    MILLPIECES: 0
+    MILLPIECES: 0,
+    // POSITIONS: []
 };
 
 const YELLOW_PLAYER = {
     AVAILABLE: 4,
     PLACED: 0,
-    MILLPIECES: 0
+    MILLPIECES: 0,
+    // POSITIONS: []
 };
 
 const PURPLE_TURN = 0;

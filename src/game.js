@@ -134,9 +134,11 @@ function placeSoldier(move, gameProperties) {
         if (move.TURN === common.PURPLE_TURN) {
             gameProperties.PURPLE_PLAYER.AVAILABLE--;
             gameProperties.PURPLE_PLAYER.PLACED++;
+            // gameProperties.PURPLE_PLAYER.POSITIONS.push({ROW: move.ROW, COL: move.COL});
         } else {
             gameProperties.YELLOW_PLAYER.AVAILABLE--;
             gameProperties.YELLOW_PLAYER.PLACED++;
+            // gameProperties.PURPLE_PLAYER.POSITIONS.push({ROW: move.ROW, COL: move.COL});
         }
         return true;
     } else {
@@ -144,6 +146,15 @@ function placeSoldier(move, gameProperties) {
         return false;
     }
 }
+
+// function findPosition(positions, row, col) {
+//     for (let i=0; i < positions.length; i++) {
+//         if (positions[i].ROW === row && positions[i].COL === col) {
+//             return i;
+//         }
+//     }
+//     return null;
+// }
 
 function removeSoldier(move, gameProperties, otherTurn) {
     // When removing, we remove the piece with that color
@@ -155,6 +166,8 @@ function removeSoldier(move, gameProperties, otherTurn) {
     if (!move.BOARD[move.ROW][move.COL].ISMILL) { // not a mill
         move.BOARD[move.ROW][move.COL].TURN = null;
         removingPiece.PLACED--;
+        // findPosition(removingPiece.POSITION, move.ROW, move.COL);
+        // removingPiece
         return true;
     } else { // is a mill
         if (removingPiece.PLACED > 0 && removingPiece.PLACED - removingPiece.MILLPIECES === 0) { // Removing from mill is possible if only mills are left
@@ -329,7 +342,7 @@ function scoreBoard(turn, board, gameProperties) {
             gameProperties.PURPLE_PLAYER.PLACED - gameProperties.YELLOW_PLAYER.PLACED);
 }
 
-function minimax(board, depth, maxPlayer, turn, phase1, gameProperties) {
+function alphabeta(board, depth, maxPlayer, turn, phase1, gameProperties, alpha, beta) {
     if (depth === 0 || (checkLose(gameProperties) !== null)) {
         return {
             VALUE: scoreBoard(turn, board, gameProperties),
@@ -347,11 +360,18 @@ function minimax(board, depth, maxPlayer, turn, phase1, gameProperties) {
         let children = getChildren(board, turn, phase1, gameProperties);
         for (let i = 0; i< children.length; i++) {
             let child = children[i];
-            let m = minimax(child.BOARD, depth-1, false, (turn+1)%2, phase1, child.PROPERTIES);
+            let m = alphabeta(child.BOARD, depth-1, false, (turn+1)%2, phase1, child.PROPERTIES, alpha, beta);
             if (m.VALUE > bestM.VALUE) {
                 bestM.VALUE = m.VALUE;
                 bestM.BOARD = child.BOARD;
                 bestM.PROPERTIES = child.PROPERTIES;
+            }
+
+            if (alpha > bestM.VALUE) {
+                alpha = bestM.VALUE;
+            }
+            if (beta <= alpha) {
+                break; // beta cut off
             }
         }
         return bestM;
@@ -364,11 +384,18 @@ function minimax(board, depth, maxPlayer, turn, phase1, gameProperties) {
         let children = getChildren(board, turn, phase1, gameProperties);
         for (let i = 0; i< children.length; i++) {
             let child = children[i];
-            let m = minimax(child.BOARD, depth-1, true, (turn+1)%2, phase1, child.PROPERTIES);
+            let m = alphabeta(child.BOARD, depth-1, true, (turn+1)%2, phase1, child.PROPERTIES, alpha, beta);
             if (m.VALUE < bestM.VALUE) {
                 bestM.VALUE = m.VALUE;
                 bestM.BOARD = child.BOARD;
                 bestM.PROPERTIES = child.PROPERTIES;
+            }
+
+            if (beta < bestM.VALUE) {
+                beta = bestM.VALUE;
+            }
+            if (beta <= alpha) {
+                break; // alpha cut off
             }
         }
         return bestM;
@@ -468,7 +495,7 @@ function handleNewMillsComputer(move, gameProperties) {
 function phase1WithComputer() {
     while (GAME_PROPERTIES.PURPLE_PLAYER.AVAILABLE > 0 || GAME_PROPERTIES.YELLOW_PLAYER.AVAILABLE > 0) {
         if (computerTurn) {
-            let bestM = minimax(board, 3, true, GAME_PROPERTIES.TURN, true, GAME_PROPERTIES);
+            let bestM = alphabeta(board, 3, true, GAME_PROPERTIES.TURN, true, GAME_PROPERTIES, -Infinity, Infinity);
             board = bestM.BOARD;
             GAME_PROPERTIES = bestM.PROPERTIES;
             GAME_PROPERTIES.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
@@ -504,7 +531,7 @@ function phase1WithComputer() {
 function phase2WithComputer() {
     while (GAME_PROPERTIES.PURPLE_PLAYER.PLACED > 2 && GAME_PROPERTIES.YELLOW_PLAYER.PLACED > 2) {
         if (computerTurn) {
-            let bestM = minimax(board, 3, true, GAME_PROPERTIES.TURN, false, GAME_PROPERTIES);
+            let bestM = alphabeta(board, 3, true, GAME_PROPERTIES.TURN, false, GAME_PROPERTIES, -Infinity, Infinity);
             board = bestM.BOARD;
             GAME_PROPERTIES = bestM.PROPERTIES;
             GAME_PROPERTIES.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
