@@ -268,10 +268,21 @@ function phase2() {
     while (GAME_PROPERTIES.PURPLE_PLAYER.PLACED > 2 && GAME_PROPERTIES.YELLOW_PLAYER.PLACED > 2) {
         if (GAME_PROPERTIES.TURN === common.YELLOW_TURN) {
             var positions = prompt("Yellow: Select position of your piece in the form of row,col");
-            var direction = prompt("Yellow: Enter 0(left), 1(right), 2(up), or 3(down)");
+
+            if (GAME_PROPERTIES.YELLOW_PLAYER.PLACED === 3) {
+                phase3(positions);
+                continue;
+            } else {
+                var direction = prompt("Yellow: Enter 0(left), 1(right), 2(up), or 3(down)");
+            }
         } else {
             var positions = prompt("Purple: Select position of your piece in the form of row,col");
-            var direction = prompt("Purple: Enter 0(left), 1(right), 2(up), or 3(down)");
+            if (GAME_PROPERTIES.PURPLE_PLAYER.PLACED === 3) {
+                phase3(positions);
+                continue;
+            } else {
+                var direction = prompt("Purple: Enter 0(left), 1(right), 2(up), or 3(down)");
+            }
         }
         positions = positions.split(",");
 
@@ -303,6 +314,45 @@ function phase2() {
         }
 
         printBoard();
+    }
+}
+
+function phase3(positions){
+    console.log("Phase3");
+    positions = positions.split(",");
+
+    let endPositions = GAME_PROPERTIES.TURN === common.YELLOW_TURN ?
+        prompt("Yellow: Enter position to fly to in the form of row,col")
+        : prompt("Purple: Enter position to fly to in the form of row,col");
+
+    endPositions = endPositions.split(",");
+
+    let startRow = parseInt(positions[0], 10);
+    let startCol = parseInt(positions[1], 10);
+
+    if (board[startRow][startCol].TURN !== GAME_PROPERTIES.TURN) {
+        // Not your color
+        console.log("Invalid piece chosen");
+        return;
+    }
+
+    let endRow = parseInt(endPositions[0], 10);
+    let endCol = parseInt(endPositions[1], 10);
+    let move = {
+        ROW: endRow,
+        COL: endCol,
+        TURN: GAME_PROPERTIES.TURN,
+        BOARD: board
+    };
+
+    if(board[endRow][endCol].ISAVAILABLE && board[endRow][endCol].TURN === null) {
+        board[endRow][endCol].TURN = GAME_PROPERTIES.TURN;
+        board[startRow][startCol].TURN = null;
+        handleNewMills(move, GAME_PROPERTIES);
+        GAME_PROPERTIES.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
+        printBoard();
+    } else {
+        console.log("Invalid fly");
     }
 }
 
@@ -582,6 +632,6 @@ function startGameWithComputer() {
     }
 }
 
-// startGameWithPlayer();
-startGameWithComputer();
+startGameWithPlayer();
+// startGameWithComputer();
 
