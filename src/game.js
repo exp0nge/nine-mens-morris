@@ -373,6 +373,8 @@ function scoreBoard(turn, maxPlayer, gameProperties) {
     return maxPlayer ? score*(r*0.01) :  score*(r*(-0.01));
 }
 
+
+// TODO: need to account for the change in phases when going thru depth
 function alphabeta(board, depth, maxPlayer, turn, phase1, gameProperties, alpha, beta) {
     if (depth === 0 || (checkLose(gameProperties) !== null)) {
         return {
@@ -632,6 +634,6 @@ function startGameWithComputer() {
     }
 }
 
-startGameWithPlayer();
-// startGameWithComputer();
+// startGameWithPlayer();
+startGameWithComputer();
 
