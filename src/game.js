@@ -469,8 +469,8 @@ function getChildren(board, turn, gameProperties) {
                 }
             } else {
                 if (board[row][col].ISAVAILABLE && board[row][col].TURN === turn) {
-                    if (turn === common.YELLOW_TURN && gameProperties.YELLOW_PLAYER.PLACED === 3 ||
-                        turn === common.PURPLE_TURN && gameProperties.PURPLE_PLAYER.PLACED === 3) { // Phase 3
+                    if ((turn === common.YELLOW_TURN && gameProperties.YELLOW_PLAYER.PLACED === 3) ||
+                        (turn === common.PURPLE_TURN && gameProperties.PURPLE_PLAYER.PLACED === 3)) { // Phase 3
                         for (let i = 0; i < MATRIX_SIZE; i++) {
                             for (let j = 0; j < MATRIX_SIZE; j++) {
                                 if (board[i][j].ISAVAILABLE && board[i][j].TURN === null) {
