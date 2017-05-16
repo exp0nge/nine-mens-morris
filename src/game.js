@@ -330,16 +330,14 @@ function countN(isRow, n, turn, board) {
 function scoreBoard(turn, board, gameProperties) {
     if (checkLose(gameProperties) !== null) {
         if (checkLose(gameProperties) === turn) {
-            return -Infinity;
+            return -100000;
         } else {
-            return Infinity;
+            return 100000;
         }
     }
 
-    return countN(true, 2, turn, board) + countN(false, 2, turn, board) +
-        10 * countN(true, 3, turn, board) + 10 * countN(false, 3, turn, board) +
-        (turn === common.YELLOW_TURN ? gameProperties.YELLOW_PLAYER.PLACED - gameProperties.PURPLE_PLAYER.PLACED :
-            gameProperties.PURPLE_PLAYER.PLACED - gameProperties.YELLOW_PLAYER.PLACED);
+    return turn === common.YELLOW_TURN ? gameProperties.YELLOW_PLAYER.PLACED - gameProperties.PURPLE_PLAYER.PLACED :
+            gameProperties.PURPLE_PLAYER.PLACED - gameProperties.YELLOW_PLAYER.PLACED;
 }
 
 function alphabeta(board, depth, maxPlayer, turn, phase1, gameProperties, alpha, beta) {
@@ -495,7 +493,7 @@ function handleNewMillsComputer(move, gameProperties) {
 function phase1WithComputer() {
     while (GAME_PROPERTIES.PURPLE_PLAYER.AVAILABLE > 0 || GAME_PROPERTIES.YELLOW_PLAYER.AVAILABLE > 0) {
         if (computerTurn) {
-            let bestM = alphabeta(board, 3, true, GAME_PROPERTIES.TURN, true, GAME_PROPERTIES, -Infinity, Infinity);
+            let bestM = alphabeta(board, 4, true, GAME_PROPERTIES.TURN, true, GAME_PROPERTIES, -Infinity, Infinity);
             board = bestM.BOARD;
             GAME_PROPERTIES = bestM.PROPERTIES;
             GAME_PROPERTIES.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
@@ -531,7 +529,7 @@ function phase1WithComputer() {
 function phase2WithComputer() {
     while (GAME_PROPERTIES.PURPLE_PLAYER.PLACED > 2 && GAME_PROPERTIES.YELLOW_PLAYER.PLACED > 2) {
         if (computerTurn) {
-            let bestM = alphabeta(board, 3, true, GAME_PROPERTIES.TURN, false, GAME_PROPERTIES, -Infinity, Infinity);
+            let bestM = alphabeta(board, 4, true, GAME_PROPERTIES.TURN, false, GAME_PROPERTIES, -Infinity, Infinity);
             board = bestM.BOARD;
             GAME_PROPERTIES = bestM.PROPERTIES;
             GAME_PROPERTIES.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
