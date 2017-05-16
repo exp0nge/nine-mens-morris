@@ -105,6 +105,7 @@ function startGameWithPlayer() {
     phase1();
     console.log("Phase2");
     phase2();
+    // TODO work on phase 3
     if (checkLose(GAME_PROPERTIES) === common.PURPLE_TURN) {
         console.log("Yellow Wins");
     } else {
@@ -305,29 +306,7 @@ function phase2() {
     }
 }
 
-function countN(isRow, n, turn, board) {
-    let totalCount = 0;
-    for (let row = 0; row < MATRIX_SIZE; row++) {
-        let count = 0;
-        for (let col = 0; col < MATRIX_SIZE; col++) {
-            if (isRow) {
-                if (board[row][col].ISAVAILABLE && board[row][col].TURN === turn) {
-                    count++;
-                }
-            } else {
-                if (board[col][row].ISAVAILABLE && board[col][row].TURN === turn) {
-                    count++;
-                }
-            }
-        }
-        if (count === n) {
-            totalCount++;
-        }
-    }
-    return totalCount;
-}
-
-function scoreBoard(turn, board, gameProperties) {
+function scoreBoard(turn, maxPlayer, gameProperties) {
     if (checkLose(gameProperties) !== null) {
         if (checkLose(gameProperties) === turn) {
             return -100000;
@@ -335,15 +314,19 @@ function scoreBoard(turn, board, gameProperties) {
             return 100000;
         }
     }
-
-    return turn === common.YELLOW_TURN ? gameProperties.YELLOW_PLAYER.PLACED - gameProperties.PURPLE_PLAYER.PLACED :
+    // Random number from 0 to 1 to choose between any equal board score randomly
+    let r = Math.random();
+    let score = turn === common.YELLOW_TURN ?
+            gameProperties.YELLOW_PLAYER.PLACED - gameProperties.PURPLE_PLAYER.PLACED :
             gameProperties.PURPLE_PLAYER.PLACED - gameProperties.YELLOW_PLAYER.PLACED;
+
+    return maxPlayer ? score*(r*0.01) :  score*(r*(-0.01));
 }
 
 function alphabeta(board, depth, maxPlayer, turn, phase1, gameProperties, alpha, beta) {
     if (depth === 0 || (checkLose(gameProperties) !== null)) {
         return {
-            VALUE: scoreBoard(turn, board, gameProperties),
+            VALUE: scoreBoard(turn, maxPlayer,gameProperties),
             BOARD: board,
             PROPERTIES: gameProperties
         };
@@ -527,7 +510,7 @@ function phase1WithComputer() {
 }
 
 function phase2WithComputer() {
-    while (GAME_PROPERTIES.PURPLE_PLAYER.PLACED > 2 && GAME_PROPERTIES.YELLOW_PLAYER.PLACED > 2) {
+    while (GAME_PROPERTIES.PURPLE_PLAYER.PLACED > 3 && GAME_PROPERTIES.YELLOW_PLAYER.PLACED > 3) {
         if (computerTurn) {
             let bestM = alphabeta(board, 4, true, GAME_PROPERTIES.TURN, false, GAME_PROPERTIES, -Infinity, Infinity);
             board = bestM.BOARD;
@@ -580,12 +563,18 @@ function phase2WithComputer() {
 
 function startGameWithComputer() {
     init();
+    /*
+    TODO consider using yellow as always first and minimax to have yellow as max
+    ComputerTurn should be a turn not true or false
+     */
+
     GAME_PROPERTIES.TURN = coinFlip();
     printBoard();
     console.log("Phase1");
     phase1WithComputer();
     console.log("Phase2");
     phase2WithComputer();
+    //TODO phase 3
     if (checkLose(GAME_PROPERTIES) === common.PURPLE_TURN) {
         console.log("Yellow Wins");
     } else {
