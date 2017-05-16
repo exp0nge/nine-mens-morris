@@ -105,7 +105,6 @@ function startGameWithPlayer() {
     phase1();
     console.log("Phase2");
     phase2();
-    // TODO work on phase 3
     if (checkLose(GAME_PROPERTIES) === common.PURPLE_TURN) {
         console.log("Yellow Wins");
     } else {
@@ -350,6 +349,7 @@ function phase3(positions){
         board[startRow][startCol].TURN = null;
         handleNewMills(move, GAME_PROPERTIES);
         GAME_PROPERTIES.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
+        computerTurn = !computerTurn;
         printBoard();
     } else {
         console.log("Invalid fly");
@@ -374,8 +374,7 @@ function scoreBoard(turn, maxPlayer, gameProperties) {
 }
 
 
-// TODO: need to account for the change in phases when going thru depth
-function alphabeta(board, depth, maxPlayer, turn, phase1, gameProperties, alpha, beta) {
+function alphabeta(board, depth, maxPlayer, turn, gameProperties, alpha, beta) {
     if (depth === 0 || (checkLose(gameProperties) !== null)) {
         return {
             VALUE: scoreBoard(turn, maxPlayer,gameProperties),
@@ -390,10 +389,10 @@ function alphabeta(board, depth, maxPlayer, turn, phase1, gameProperties, alpha,
             BOARD: null,
             PROPERTIES: null
         };
-        let children = getChildren(board, turn, phase1, gameProperties);
+        let children = getChildren(board, turn, gameProperties);
         for (let i = 0; i< children.length; i++) {
             let child = children[i];
-            let m = alphabeta(child.BOARD, depth-1, false, (turn+1)%2, phase1, child.PROPERTIES, alpha, beta);
+            let m = alphabeta(child.BOARD, depth-1, false, (turn+1)%2, child.PROPERTIES, alpha, beta);
             if (m.VALUE > bestM.VALUE) {
                 bestM.VALUE = m.VALUE;
                 bestM.BOARD = child.BOARD;
@@ -414,10 +413,10 @@ function alphabeta(board, depth, maxPlayer, turn, phase1, gameProperties, alpha,
             BOARD: null,
             PROPERTIES: null
         };
-        let children = getChildren(board, turn, phase1, gameProperties);
+        let children = getChildren(board, turn, gameProperties);
         for (let i = 0; i< children.length; i++) {
             let child = children[i];
-            let m = alphabeta(child.BOARD, depth-1, true, (turn+1)%2, phase1, child.PROPERTIES, alpha, beta);
+            let m = alphabeta(child.BOARD, depth-1, true, (turn+1)%2, child.PROPERTIES, alpha, beta);
             if (m.VALUE < bestM.VALUE) {
                 bestM.VALUE = m.VALUE;
                 bestM.BOARD = child.BOARD;
@@ -454,11 +453,11 @@ function cloneGameProperties(gameProperties){
 }
 
 
-function getChildren(board, turn, phase1, gameProperties) {
+function getChildren(board, turn, gameProperties) {
     let children = [];
     for (let row = 0; row < MATRIX_SIZE; row++) {
         for (let col = 0; col < MATRIX_SIZE; col++) {
-            if (phase1) {
+            if (gameProperties.PURPLE_PLAYER.AVAILABLE > 0 || gameProperties.YELLOW_PLAYER.AVAILABLE > 0) { // Phase 1
                 if (board[row][col].ISAVAILABLE && board[row][col].TURN === null) {
                     let copyBoard = cloneBoard(board);
                     let copyGameProperties = cloneGameProperties(gameProperties);
@@ -470,18 +469,42 @@ function getChildren(board, turn, phase1, gameProperties) {
                 }
             } else {
                 if (board[row][col].ISAVAILABLE && board[row][col].TURN === turn) {
-                    for (let i = 0; i<4; i++) {
-                        let copyBoard = cloneBoard(board);
-                        let copyGameProperties = cloneGameProperties(gameProperties);
-                        let move = {ROW: row, COL: col, BOARD: copyBoard, TURN: turn};
+                    if (turn === common.YELLOW_TURN && gameProperties.YELLOW_PLAYER.PLACED === 3 ||
+                        turn === common.PURPLE_TURN && gameProperties.PURPLE_PLAYER.PLACED === 3) { // Phase 3
+                        for (let i = 0; i < MATRIX_SIZE; i++) {
+                            for (let j = 0; j < MATRIX_SIZE; j++) {
+                                if (board[i][j].ISAVAILABLE && board[i][j].TURN === null) {
+                                    let copyBoard = cloneBoard(board);
+                                    let copyGameProperties = cloneGameProperties(gameProperties);
+                                    copyBoard[i][j].TURN = turn;
+                                    copyBoard[row][col].TURN = null;
 
-                        move.SHIFT = i;
-                        if (shiftSoldier(move, copyGameProperties)) {
-                            // Update row and col for handleNewMills
-                            move.ROW = move.SHIFTROW;
-                            move.COL = move.SHIFTCOL;
-                            handleNewMillsComputer(move, copyGameProperties);
-                            children.push({BOARD: copyBoard, PROPERTIES: copyGameProperties});
+                                    let move = {
+                                        ROW: i,
+                                        COL: j,
+                                        GAME_PROPERTIES: copyGameProperties,
+                                        BOARD: copyBoard
+                                    };
+
+                                    handleNewMillsComputer(move, copyGameProperties);
+                                    children.push({BOARD: copyBoard, PROPERTIES: copyGameProperties});
+                                }
+                            }
+                        }
+                    } else { // Phase 2
+                        for (let i = 0; i < 4; i++) {
+                            let copyBoard = cloneBoard(board);
+                            let copyGameProperties = cloneGameProperties(gameProperties);
+                            let move = {ROW: row, COL: col, BOARD: copyBoard, TURN: turn};
+
+                            move.SHIFT = i;
+                            if (shiftSoldier(move, copyGameProperties)) {
+                                // Update row and col for handleNewMills
+                                move.ROW = move.SHIFTROW;
+                                move.COL = move.SHIFTCOL;
+                                handleNewMillsComputer(move, copyGameProperties);
+                                children.push({BOARD: copyBoard, PROPERTIES: copyGameProperties});
+                            }
                         }
                     }
                 }
@@ -524,11 +547,12 @@ function handleNewMillsComputer(move, gameProperties) {
     }
 }
 
+let depth = 4; // TODO seems like the max reasonable depth is 4, but 3 works pretty fast
 
 function phase1WithComputer() {
     while (GAME_PROPERTIES.PURPLE_PLAYER.AVAILABLE > 0 || GAME_PROPERTIES.YELLOW_PLAYER.AVAILABLE > 0) {
         if (computerTurn) {
-            let bestM = alphabeta(board, 4, true, GAME_PROPERTIES.TURN, true, GAME_PROPERTIES, -Infinity, Infinity);
+            let bestM = alphabeta(board, depth, true, GAME_PROPERTIES.TURN, GAME_PROPERTIES, -Infinity, Infinity);
             board = bestM.BOARD;
             GAME_PROPERTIES = bestM.PROPERTIES;
             GAME_PROPERTIES.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
@@ -562,9 +586,9 @@ function phase1WithComputer() {
 }
 
 function phase2WithComputer() {
-    while (GAME_PROPERTIES.PURPLE_PLAYER.PLACED > 3 && GAME_PROPERTIES.YELLOW_PLAYER.PLACED > 3) {
+    while (GAME_PROPERTIES.PURPLE_PLAYER.PLACED > 2 && GAME_PROPERTIES.YELLOW_PLAYER.PLACED > 2) {
         if (computerTurn) {
-            let bestM = alphabeta(board, 4, true, GAME_PROPERTIES.TURN, false, GAME_PROPERTIES, -Infinity, Infinity);
+            let bestM = alphabeta(board, depth, true, GAME_PROPERTIES.TURN, GAME_PROPERTIES, -Infinity, Infinity);
             board = bestM.BOARD;
             GAME_PROPERTIES = bestM.PROPERTIES;
             GAME_PROPERTIES.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
@@ -573,10 +597,21 @@ function phase2WithComputer() {
         } else {
             if (GAME_PROPERTIES.TURN === common.YELLOW_TURN) {
                 var positions = prompt("Yellow: Select position of your piece in the form of row,col");
-                var direction = prompt("Yellow: Enter 0(left), 1(right), 2(up), or 3(down)");
+
+                if (GAME_PROPERTIES.YELLOW_PLAYER.PLACED === 3) {
+                    phase3(positions);
+                    continue;
+                } else {
+                    var direction = prompt("Yellow: Enter 0(left), 1(right), 2(up), or 3(down)");
+                }
             } else {
                 var positions = prompt("Purple: Select position of your piece in the form of row,col");
-                var direction = prompt("Purple: Enter 0(left), 1(right), 2(up), or 3(down)");
+                if (GAME_PROPERTIES.PURPLE_PLAYER.PLACED === 3) {
+                    phase3(positions);
+                    continue;
+                } else {
+                    var direction = prompt("Purple: Enter 0(left), 1(right), 2(up), or 3(down)");
+                }
             }
             positions = positions.split(",");
 
@@ -626,7 +661,6 @@ function startGameWithComputer() {
     phase1WithComputer();
     console.log("Phase2");
     phase2WithComputer();
-    //TODO phase 3
     if (checkLose(GAME_PROPERTIES) === common.PURPLE_TURN) {
         console.log("Yellow Wins");
     } else {
