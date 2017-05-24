@@ -134,11 +134,9 @@ function placeSoldier(move, gameProperties) {
         if (move.TURN === common.PURPLE_TURN) {
             gameProperties.PURPLE_PLAYER.AVAILABLE--;
             gameProperties.PURPLE_PLAYER.PLACED++;
-            // gameProperties.PURPLE_PLAYER.POSITIONS.push({ROW: move.ROW, COL: move.COL});
         } else {
             gameProperties.YELLOW_PLAYER.AVAILABLE--;
             gameProperties.YELLOW_PLAYER.PLACED++;
-            // gameProperties.PURPLE_PLAYER.POSITIONS.push({ROW: move.ROW, COL: move.COL});
         }
         return true;
     } else {
@@ -146,15 +144,6 @@ function placeSoldier(move, gameProperties) {
         return false;
     }
 }
-
-// function findPosition(positions, row, col) {
-//     for (let i=0; i < positions.length; i++) {
-//         if (positions[i].ROW === row && positions[i].COL === col) {
-//             return i;
-//         }
-//     }
-//     return null;
-// }
 
 function removeSoldier(move, gameProperties, otherTurn) {
     // When removing, we remove the piece with that color
@@ -432,20 +421,10 @@ function alphabeta(board, depth, maxPlayer, turn, gameProperties, alpha, beta) {
         }
         return bestM;
     }
-
-
 }
 
 function cloneBoard(board) {
-    let clone = new Array(board.length);
-    for(let i=0; i<board.length; i++) {
-        clone[i] = new Array(board[i].length);
-        for(let j=0; j<board[i].length; j++) {
-            clone[i][j] = JSON.parse(JSON.stringify(board[i][j]));
-        }
-    }
-
-    return clone;
+    return JSON.parse(JSON.stringify(board));
 }
 
 function cloneGameProperties(gameProperties){
