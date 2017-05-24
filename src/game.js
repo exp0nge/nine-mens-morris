@@ -387,7 +387,7 @@ function phaseTwoHandler(e) {
         let move = makeMoveProp(x_original, y_original, GAME_PROPERTIES.TURN, true, x, y, board);
 
         if (GAME_PROPERTIES.TURN === common.YELLOW_TURN ?
-                GAME_PROPERTIES.YELLOW_PLAYER.PLACED === 3 : GAME_PROPERTIES.PURPLE_PLAYER.PLACED === 3) {
+            GAME_PROPERTIES.YELLOW_PLAYER.PLACED === 3 : GAME_PROPERTIES.PURPLE_PLAYER.PLACED === 3) {
             move.FLYING = true;
         }
 
@@ -445,14 +445,14 @@ function scoreBoard(turn, maxPlayer, gameProperties) {
         gameProperties.YELLOW_PLAYER.PLACED - gameProperties.PURPLE_PLAYER.PLACED :
         gameProperties.PURPLE_PLAYER.PLACED - gameProperties.YELLOW_PLAYER.PLACED;
 
-    return maxPlayer ? score*(r*0.01) :  score*(r*(-0.01));
+    return maxPlayer ? score * (r * 0.01) : score * (r * (-0.01));
 }
 
 
 function alphabeta(board, depth, maxPlayer, turn, gameProperties, alpha, beta) {
     if (depth === 0 || (checkLose(gameProperties) !== null)) {
         return {
-            VALUE: scoreBoard(turn, maxPlayer,gameProperties),
+            VALUE: scoreBoard(turn, maxPlayer, gameProperties),
             BOARD: board,
             PROPERTIES: gameProperties
         };
@@ -465,9 +465,9 @@ function alphabeta(board, depth, maxPlayer, turn, gameProperties, alpha, beta) {
             PROPERTIES: null
         };
         let children = getChildren(board, turn, gameProperties);
-        for (let i = 0; i< children.length; i++) {
+        for (let i = 0; i < children.length; i++) {
             let child = children[i];
-            let m = alphabeta(child.BOARD, depth-1, false, (turn+1)%2, child.PROPERTIES, alpha, beta);
+            let m = alphabeta(child.BOARD, depth - 1, false, (turn + 1) % 2, child.PROPERTIES, alpha, beta);
             if (m.VALUE > bestM.VALUE) {
                 bestM.VALUE = m.VALUE;
                 bestM.BOARD = child.BOARD;
@@ -489,9 +489,9 @@ function alphabeta(board, depth, maxPlayer, turn, gameProperties, alpha, beta) {
             PROPERTIES: null
         };
         let children = getChildren(board, turn, gameProperties);
-        for (let i = 0; i< children.length; i++) {
+        for (let i = 0; i < children.length; i++) {
             let child = children[i];
-            let m = alphabeta(child.BOARD, depth-1, true, (turn+1)%2, child.PROPERTIES, alpha, beta);
+            let m = alphabeta(child.BOARD, depth - 1, true, (turn + 1) % 2, child.PROPERTIES, alpha, beta);
             if (m.VALUE < bestM.VALUE) {
                 bestM.VALUE = m.VALUE;
                 bestM.BOARD = child.BOARD;
@@ -513,7 +513,7 @@ function cloneBoard(board) {
     return JSON.parse(JSON.stringify(board));
 }
 
-function cloneGameProperties(gameProperties){
+function cloneGameProperties(gameProperties) {
     return JSON.parse(JSON.stringify(gameProperties));
 }
 
@@ -526,11 +526,11 @@ function getChildren(board, turn, gameProperties) {
                 if (board[row][col].ISAVAILABLE && board[row][col].TURN === null) {
                     let copyBoard = cloneBoard(board);
                     let copyGameProperties = cloneGameProperties(gameProperties);
-                    let move = {ROW: row, COL: col, BOARD: copyBoard, TURN: turn};
+                    let move = { ROW: row, COL: col, BOARD: copyBoard, TURN: turn };
 
                     placeSoldier(move, copyGameProperties);
                     handleNewMillsComputer(move, copyGameProperties);
-                    children.push({BOARD: copyBoard, PROPERTIES: copyGameProperties});
+                    children.push({ BOARD: copyBoard, PROPERTIES: copyGameProperties });
                 }
             } else {
                 if (board[row][col].ISAVAILABLE && board[row][col].TURN === turn) {
@@ -552,7 +552,7 @@ function getChildren(board, turn, gameProperties) {
                                     };
 
                                     handleNewMillsComputer(move, copyGameProperties);
-                                    children.push({BOARD: copyBoard, PROPERTIES: copyGameProperties});
+                                    children.push({ BOARD: copyBoard, PROPERTIES: copyGameProperties });
                                 }
                             }
                         }
@@ -560,7 +560,7 @@ function getChildren(board, turn, gameProperties) {
                         for (let i = 0; i < 4; i++) {
                             let copyBoard = cloneBoard(board);
                             let copyGameProperties = cloneGameProperties(gameProperties);
-                            let move = {ROW: row, COL: col, BOARD: copyBoard, TURN: turn};
+                            let move = { ROW: row, COL: col, BOARD: copyBoard, TURN: turn };
 
                             move.SHIFT = i;
                             if (shiftSoldier(move, copyGameProperties)) {
@@ -568,7 +568,7 @@ function getChildren(board, turn, gameProperties) {
                                 move.ROW = move.SHIFTROW;
                                 move.COL = move.SHIFTCOL;
                                 handleNewMillsComputer(move, copyGameProperties);
-                                children.push({BOARD: copyBoard, PROPERTIES: copyGameProperties});
+                                children.push({ BOARD: copyBoard, PROPERTIES: copyGameProperties });
                             }
                         }
                     }
@@ -585,7 +585,7 @@ var computerTurn = false;
 function handleNewMillsComputer(move, gameProperties) {
     let numMills = algorithm.countNewMills(move, gameProperties);
     let otherTurn = (move.TURN + 1) % 2;
-    while(numMills > 0 && !checkLose(gameProperties)) {
+    while (numMills > 0 && !checkLose(gameProperties)) {
         let removeMillPiece = false;
 
         let removingPiece = (otherTurn === common.PURPLE_TURN) ? gameProperties.PURPLE_PLAYER : gameProperties.YELLOW_PLAYER;
@@ -597,7 +597,7 @@ function handleNewMillsComputer(move, gameProperties) {
             for (let col = 0; col < MATRIX_SIZE; col++) {
                 move.ROW = row;
                 move.COL = col;
-                if (algorithm.isRemovable(move, otherTurn))  {
+                if (algorithm.isRemovable(move, otherTurn)) {
                     if ((removeMillPiece && move.BOARD[move.ROW][move.COL].ISMILL) ||
                         (!removeMillPiece && !move.BOARD[move.ROW][move.COL].ISMILL)) {
                         removeSoldier(move, gameProperties, otherTurn);
@@ -739,7 +739,7 @@ function startGameWithComputer() {
 
 
 function updateBoardUI() {
-    for(let i=0; i<MATRIX_SIZE; i++) {
+    for (let i = 0; i < MATRIX_SIZE; i++) {
         for (let j = 0; j < MATRIX_SIZE; j++) {
             let piece = svg.getElementById(i.toString() + j.toString());
             let current = board[i][j];

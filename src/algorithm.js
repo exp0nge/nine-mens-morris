@@ -59,6 +59,8 @@ function isValidMove(move) {
 }
 
 function isRemovable(move, otherTurn) {
+    console.log(move);
+    console.log(otherTurn);
     // Is not part of a mill and has a piece
     let tileState = move.BOARD[move.ROW][move.COL];
     return (tileState.ISAVAILABLE && tileState.TURN === otherTurn);
@@ -101,10 +103,14 @@ const mapRows = {
 };
 
 function isValidShift(move) {
+
+    if (move.FLYING !== null && move.FLYING !== undefined) {
+        console.log("flying");
+        return true;
+    }
+
     let i = move.ROW;
     let j = move.COL;
-    let t1 = 0;
-    let t2 = 0;
     let rowBounds = [0, 6];
     let colBounds = [0, 6];
 
@@ -205,5 +211,4 @@ function isPossibleShift(move) {
     }
 }
 
-export {countNewMills, isValidMove, isRemovable, isValidShift, CENTER_POSITION, isPossibleShift};
-
+export { countNewMills, isValidMove, isRemovable, isValidShift, CENTER_POSITION, isPossibleShift };
