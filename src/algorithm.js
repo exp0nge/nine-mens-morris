@@ -59,8 +59,6 @@ function isValidMove(move) {
 }
 
 function isRemovable(move, otherTurn) {
-    console.log(move);
-    console.log(otherTurn);
     // Is not part of a mill and has a piece
     let tileState = move.BOARD[move.ROW][move.COL];
     return (tileState.ISAVAILABLE && tileState.TURN === otherTurn);
@@ -97,6 +95,10 @@ const VALID_SHIFTS = {
 };
 
 const mapRows = {
+    0: 0,
+    1: 1,
+    2: 2,
+    3: 3,
     4: 2,
     5: 1,
     6: 0
@@ -119,11 +121,8 @@ function isValidShift(move) {
         // console.log("1");
         return false;
     }
-    console.log(move);
     let row = move.ROW > 3 ? mapRows[move.ROW] : move.ROW;
     let shiftRow = move.SHIFTROW > 3 ? mapRows[move.SHIFTROW] : move.SHIFTROW;
-    console.log("row: " + row);
-    console.log("shift row: " + shiftRow);
     if (VALID_SHIFTS[row] === undefined || VALID_SHIFTS[row][move.COL] === undefined) {
         return false
     }
@@ -138,77 +137,8 @@ function isValidShift(move) {
     return false;
 }
 
-function isPossibleShift(move) {
-    let i = move.ROW;
-    let j = move.COL;
-    let t1 = 0;
-    let t2 = 0;
-    let rowBounds = [0, 6];
-    let colBounds = [0, 6];
-
-    // Make sure that there is a piece to move
-    if (!move.BOARD[move.ROW][move.COL].ISAVAILABLE) {
-        // console.log("1");
-        return false;
-    }
-
-    // Translation for shift
-    switch (move.SHIFT) {
-        case SHIFT.LEFT:
-            t2 = -1;
-            break;
-        case SHIFT.RIGHT:
-            t2 = 1;
-            break;
-        case SHIFT.UP:
-            t1 = -1;
-            break;
-        case SHIFT.DOWN:
-            t1 = 1;
-            break;
-        default:
-            // console.log("2");
-            return false;
-    }
-
-    // Special cases for center row/column
-    if (move.ROW === CENTER_POSITION) {
-        if (move.COL < CENTER_POSITION) {
-            colBounds[1] = CENTER_POSITION;
-        } else {
-            colBounds[0] = CENTER_POSITION;
-        }
-    }
-
-    if (move.COL === CENTER_POSITION) {
-        if (move.ROW < CENTER_POSITION) {
-            rowBounds[1] = CENTER_POSITION;
-        } else {
-            rowBounds[0] = CENTER_POSITION;
-        }
-    }
-
-    while (true) { // Continue moving in a direction
-        i += t1;
-        j += t2;
-
-        if (i < rowBounds[0] || i > rowBounds[1] || j < colBounds[0] || j > colBounds[1]) { // Out of bounds
-            // console.log("3");
-            return false;
-        }
-
-        if (move.BOARD[i][j].ISAVAILABLE) {
-            if (move.BOARD[i][j].TURN === null) { // No piece there, we can shift
-                move.SHIFTROW = i;
-                move.SHIFTCOL = j;
-                return true;
-            } else {
-                // console.log(move);
-                // console.log("4");
-                return false;
-            }
-        }
-    }
+function possibleShifts(row, col) {
+    return VALID_SHIFTS[mapRows[row]][mapRows[col]];
 }
 
-export { countNewMills, isValidMove, isRemovable, isValidShift, CENTER_POSITION, isPossibleShift };
+export { countNewMills, isValidMove, isRemovable, isValidShift, CENTER_POSITION, possibleShifts };

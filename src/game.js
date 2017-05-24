@@ -98,6 +98,9 @@ const turnPromptText = document.getElementById("turnPromptText");
 function setTurnText(message) {
     turnText.style.display = "block";
     turnText.innerHTML = message || GAME_PROPERTIES.TURN ? "YELLOW (1)" : "PURPLE (0)";
+    if (computerTurn && GAME_PROPERTIES.TURN === computerTurn) {
+        turnText.innerHTML += " AI";
+    }
     turnText.style.backgroundColor = SHARP_COLORS[GAME_PROPERTIES.TURN];
 }
 
@@ -115,9 +118,20 @@ function clearElement(element) {
 }
 
 function setCaptureText(message) {
-    console.log(message);
+    let defaultMessage = "";
+    if (GAME_PROPERTIES.TURN === YELLOW_TURN) {
+        defaultMessage = "Click on a PURPLE piece to remove";
+    } else {
+        defaultMessage = "Click on a YELLOW piece to remove";
+    }
+
+    if (isMillBreakable()) { // Removing from mill is possible if only mills are left
+        defaultMessage += " that is part of a mill";
+    } else {
+        defaultMessage += " that is not part of a mill";
+    }
     turnPromptText.style.display = "block";
-    turnPromptText.innerHTML = message;
+    turnPromptText.innerHTML = message || defaultMessage;
     turnPromptText.style.backgroundColor = SHARP_COLORS[GAME_PROPERTIES.TURN];
 }
 
@@ -200,6 +214,8 @@ function removeSoldier(move, gameProperties, otherTurn) {
 
 function shiftSoldier(move, gameProperties) {
     if (algorithm.isValidShift(move)) {
+        console.log("shifting");
+        console.log(move);
         // reset state of current
         move.BOARD[move.ROW][move.COL].TURN = null;
         if (move.BOARD[move.ROW][move.COL].ISMILL === true) {
@@ -255,7 +271,11 @@ function handleNewMills(move, gameProperties) {
 
 console.log("initializing game");
 
-startGameWithPlayer();
+if (window.location.search.includes("ai")) {
+    startGameWithComputer();
+} else {
+    startGameWithPlayer();
+}
 
 console.log("turn: " + GAME_PROPERTIES.TURN);
 
@@ -268,6 +288,19 @@ function invalidMoveAlert() {
     setTimeout(function() {
         clearElement(alert);
     }, 5000);
+}
+
+function checkPhaseOneEnd() {
+    if (GAME_PROPERTIES.PHASE == 1 &&
+        GAME_PROPERTIES.PURPLE_PLAYER.AVAILABLE === 0 &&
+        GAME_PROPERTIES.YELLOW_PLAYER.AVAILABLE === 0 &&
+        !GAME_PROPERTIES.CAPTURING) {
+        // phase 1 end
+        console.log("------------ PHASE 1 COMPLETE ------------");
+        document.getElementById("phaseText").innerHTML = "Phase 2: Move and capture";
+        GAME_PROPERTIES.PHASE = 2;
+        setMoveText();
+    }
 }
 
 function phaseOneHandler(e) {
@@ -291,13 +324,7 @@ function phaseOneHandler(e) {
                     clearElement(turnPromptText);
                 }
 
-                if (PURPLE_PLAYER.AVAILABLE === 0 && YELLOW_PLAYER.AVAILABLE === 0 && !GAME_PROPERTIES.CAPTURING) {
-                    // phase 1 end
-                    console.log("------------ PHASE 1 COMPLETE ------------");
-                    document.getElementById("phaseText").innerHTML = "Phase 2: Move and capture";
-                    GAME_PROPERTIES.PHASE = 2;
-                    setMoveText();
-                }
+                checkPhaseOneEnd();
                 console.log(GAME_PROPERTIES);
             } else {
                 invalidMoveAlert();
@@ -320,13 +347,7 @@ function phaseOneHandler(e) {
         throw RangeError("GAME_PROPERTIES.TURN not handled");
     }
 
-    if (PURPLE_PLAYER.AVAILABLE === 0 && YELLOW_PLAYER.AVAILABLE === 0 && !GAME_PROPERTIES.CAPTURING) {
-        // phase 1 end
-        console.log("------------ PHASE 1 COMPLETE ------------");
-        document.getElementById("phaseText").innerHTML = "Phase 2: Move and capture";
-        GAME_PROPERTIES.PHASE = 2;
-        setMoveText();
-    }
+    checkPhaseOneEnd();
 
     setTurnText();
 }
@@ -417,18 +438,24 @@ function phaseTwoHandler(e) {
 const svg = document.getElementById("board").getSVGDocument();
 
 setUpClicks((e) => {
+    if (computerTurn == GAME_PROPERTIES.TURN) {
+        console.log("ai going, wait please");
+        console.log(GAME_PROPERTIES);
+        console.log(computerTurn);
+        return;
+    }
     if (GAME_PROPERTIES.PHASE === 1 || GAME_PROPERTIES.MILLS > 0) {
         phaseOneHandler(e);
+        console.log("calling beep");
+        console.log(computerTurn);
+        console.log(GAME_PROPERTIES);
+        phase1WithComputer();
     } else if (GAME_PROPERTIES.PHASE === 2) {
         phaseTwoHandler(e);
+        phase2WithComputer();
     }
     alertIfWinner();
 });
-
-
-
-
-
 
 
 function scoreBoard(turn, maxPlayer, gameProperties) {
@@ -557,12 +584,12 @@ function getChildren(board, turn, gameProperties) {
                             }
                         }
                     } else { // Phase 2
-                        for (let i = 0; i < 4; i++) {
+                        let shifts = algorithm.possibleShifts(row, col);
+                        for (let i = 0; i < shifts.length; i++) {
                             let copyBoard = cloneBoard(board);
                             let copyGameProperties = cloneGameProperties(gameProperties);
-                            let move = { ROW: row, COL: col, BOARD: copyBoard, TURN: turn };
+                            let move = makeMoveProp(row, col, turn, true, shifts[i].X, shifts[i].Y, copyBoard);
 
-                            move.SHIFT = i;
                             if (shiftSoldier(move, copyGameProperties)) {
                                 // Update row and col for handleNewMills
                                 move.ROW = move.SHIFTROW;
@@ -580,7 +607,7 @@ function getChildren(board, turn, gameProperties) {
     return children;
 }
 
-var computerTurn = false;
+let computerTurn = false;
 
 function handleNewMillsComputer(move, gameProperties) {
     let numMills = algorithm.countNewMills(move, gameProperties);
@@ -612,11 +639,12 @@ function handleNewMillsComputer(move, gameProperties) {
     }
 }
 
-let depth = 4; // TODO seems like the max reasonable depth is 4, but 3 works pretty fast
+let depth = 3; // TODO seems like the max reasonable depth is 4, but 3 works pretty fast
 
 function phase1WithComputer() {
-    while (GAME_PROPERTIES.PURPLE_PLAYER.AVAILABLE > 0 || GAME_PROPERTIES.YELLOW_PLAYER.AVAILABLE > 0) {
-        if (computerTurn) {
+    if (computerTurn == GAME_PROPERTIES.TURN) {
+        setTimeout(() => {
+            console.log("BEEP PLAYING");
             let bestM = alphabeta(board, depth, true, GAME_PROPERTIES.TURN, GAME_PROPERTIES, -Infinity, Infinity);
             board = bestM.BOARD;
             updateBoardUI();
@@ -624,37 +652,18 @@ function phase1WithComputer() {
             GAME_PROPERTIES = bestM.PROPERTIES;
             GAME_PROPERTIES.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
             printBoard();
-            computerTurn = !computerTurn;
-        } else {
-            if (GAME_PROPERTIES.TURN === common.YELLOW_TURN) {
-                var positions = prompt("Yellow: Enter a position to place the piece in the form of row,col");
-            } else {
-                var positions = prompt("Purple: Enter a position to place the piece in the form of row,col");
-            }
-            positions = positions.split(",");
-            let move = {
-                ROW: parseInt(positions[0], 10),
-                COL: parseInt(positions[1], 10),
-                TURN: GAME_PROPERTIES.TURN,
-                BOARD: board
-            };
-
-            if (placeSoldier(move, GAME_PROPERTIES)) {
-                handleNewMills(move, GAME_PROPERTIES);
-                GAME_PROPERTIES.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
-                printBoard();
-                computerTurn = !computerTurn;
-            } else {
-                console.log("Invalid place");
-            }
-        }
-
+            computerTurn = otherPlayer();
+            setTurnText();
+            clearElement(turnPromptText);
+            checkPhaseOneEnd();
+        }, 500);
     }
 }
 
 function phase2WithComputer() {
-    while (GAME_PROPERTIES.PURPLE_PLAYER.PLACED > 2 && GAME_PROPERTIES.YELLOW_PLAYER.PLACED > 2) {
-        if (computerTurn) {
+    if (computerTurn == GAME_PROPERTIES.TURN) {
+        setTimeout(() => {
+            console.log("BEEP PHASE 2 PLAYING");
             let bestM = alphabeta(board, depth, true, GAME_PROPERTIES.TURN, GAME_PROPERTIES, -Infinity, Infinity);
             board = bestM.BOARD;
             updateBoardUI();
@@ -662,62 +671,18 @@ function phase2WithComputer() {
             GAME_PROPERTIES = bestM.PROPERTIES;
             GAME_PROPERTIES.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
             printBoard();
-            computerTurn = !computerTurn;
-        } else {
-            if (GAME_PROPERTIES.TURN === common.YELLOW_TURN) {
-                var positions = prompt("Yellow: Select position of your piece in the form of row,col");
+            computerTurn = otherPlayer();
+            setTurnText();
+            clearElement(turnPromptText);
+            setCaptureText();
 
-                if (GAME_PROPERTIES.YELLOW_PLAYER.PLACED === 3) {
-                    phase3(positions);
-                    continue;
-                } else {
-                    var direction = prompt("Yellow: Enter 0(left), 1(right), 2(up), or 3(down)");
-                }
-            } else {
-                var positions = prompt("Purple: Select position of your piece in the form of row,col");
-                if (GAME_PROPERTIES.PURPLE_PLAYER.PLACED === 3) {
-                    phase3(positions);
-                    continue;
-                } else {
-                    var direction = prompt("Purple: Enter 0(left), 1(right), 2(up), or 3(down)");
-                }
-            }
-            positions = positions.split(",");
-
-            // Set up move for shift
-            let move = {
-                ROW: parseInt(positions[0], 10),
-                COL: parseInt(positions[1], 10),
-                TURN: GAME_PROPERTIES.TURN,
-                BOARD: board,
-                SHIFT: parseInt(direction, 10),
-                SHIFTROW: null,
-                SHIFTCOL: null
-            };
-
-            if (move.BOARD[move.ROW][move.COL].TURN !== GAME_PROPERTIES.TURN) {
-                // Not your color
-                console.log("Invalid piece chosen");
-                continue;
-            }
-
-            if (shiftSoldier(move, GAME_PROPERTIES)) {
-                // Update row and col for handleNewMills
-                move.ROW = move.SHIFTROW;
-                move.COL = move.SHIFTCOL;
-                handleNewMills(move, GAME_PROPERTIES);
-                GAME_PROPERTIES.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
-                computerTurn = !computerTurn;
-            } else {
-                console.log("Invalid shift");
-            }
-
-            printBoard();
-        }
+            alertIfWinner();
+        }, 500);
     }
 }
 
 function startGameWithComputer() {
+    console.log("BEEP BOT ACTIVATED");
     init();
     /*
      TODO consider using yellow as always first and minimax to have yellow as max
@@ -725,23 +690,21 @@ function startGameWithComputer() {
      */
 
     GAME_PROPERTIES.TURN = coinFlip();
+    computerTurn = coinFlip();
     printBoard();
-    console.log("Phase1");
-    phase1WithComputer();
-    console.log("Phase2");
-    phase2WithComputer();
-    if (checkLose(GAME_PROPERTIES) === common.PURPLE_TURN) {
-        console.log("Yellow Wins");
-    } else {
-        console.log("Purple Wins");
+    setTurnText();
+    console.log("BEEP IS " + computerTurn);
+    if (GAME_PROPERTIES.TURN === computerTurn) {
+        phase1WithComputer();
     }
+
 }
 
 
 function updateBoardUI() {
     for (let i = 0; i < MATRIX_SIZE; i++) {
         for (let j = 0; j < MATRIX_SIZE; j++) {
-            let piece = svg.getElementById(i.toString() + j.toString());
+            let piece = document.getElementById("board").getSVGDocument().getElementById(i.toString() + j.toString());
             let current = board[i][j];
             if (current.ISAVAILABLE) {
                 // You can place something at all
