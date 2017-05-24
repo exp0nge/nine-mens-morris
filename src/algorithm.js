@@ -91,18 +91,25 @@ const VALID_SHIFTS = {
         4: [new Coordinate(2, 4), new Coordinate(4, 4), new Coordinate(3, 5)],
         5: [new Coordinate(1, 5), new Coordinate(3, 4), new Coordinate(3, 6), new Coordinate(5, 5)],
         6: [new Coordinate(0, 6), new Coordinate(3, 5), new Coordinate(6, 6)]
+    },
+    6: {
+        0: [new Coordinate(6, 3), new Coordinate(3, 0)],
+        3: [new Coordinate(6, 0), new Coordinate(6, 6), new Coordinate(5, 3)],
+        6: [new Coordinate(6, 3), new Coordinate(3, 6)]
+    },
+    5: {
+        1: [new Coordinate(3, 1), new Coordinate(5, 3)],
+        3: [new Coordinate(5, 1), new Coordinate(5, 5), new Coordinate(4, 3), new Coordinate(6, 3)],
+        5: [new Coordinate(5, 3), new Coordinate(3, 5)]
+    },
+    4: {
+        2: [new Coordinate(4, 3), new Coordinate(3, 2)],
+        3: [new Coordinate(4, 2), new Coordinate(4, 4), new Coordinate(5, 3)],
+        4: [new Coordinate(4, 3), new Coordinate(3, 4)]
     }
 };
 
-const mapRows = {
-    0: 0,
-    1: 1,
-    2: 2,
-    3: 3,
-    4: 2,
-    5: 1,
-    6: 0
-};
+
 
 function isValidShift(move) {
 
@@ -113,16 +120,14 @@ function isValidShift(move) {
 
     let i = move.ROW;
     let j = move.COL;
-    let rowBounds = [0, 6];
-    let colBounds = [0, 6];
 
     // Make sure that there is a piece to move
     if (!move.BOARD[move.ROW][move.COL].ISAVAILABLE) {
         // console.log("1");
         return false;
     }
-    let row = move.ROW > 3 ? mapRows[move.ROW] : move.ROW;
-    let shiftRow = move.SHIFTROW > 3 ? mapRows[move.SHIFTROW] : move.SHIFTROW;
+    let row = move.ROW;
+    let shiftRow = move.SHIFTROW;
     if (VALID_SHIFTS[row] === undefined || VALID_SHIFTS[row][move.COL] === undefined) {
         return false
     }
@@ -138,7 +143,7 @@ function isValidShift(move) {
 }
 
 function possibleShifts(row, col) {
-    return VALID_SHIFTS[mapRows[row]][mapRows[col]];
+    return VALID_SHIFTS[row][col];
 }
 
 export { countNewMills, isValidMove, isRemovable, isValidShift, CENTER_POSITION, possibleShifts };

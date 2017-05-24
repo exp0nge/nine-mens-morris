@@ -98,9 +98,10 @@ const turnPromptText = document.getElementById("turnPromptText");
 function setTurnText(message) {
     turnText.style.display = "block";
     turnText.innerHTML = message || GAME_PROPERTIES.TURN ? "YELLOW (1)" : "PURPLE (0)";
-    if (computerTurn && GAME_PROPERTIES.TURN === computerTurn) {
+    if (GAME_PROPERTIES.TURN === computerTurn) {
         turnText.innerHTML += " AI";
     }
+
     turnText.style.backgroundColor = SHARP_COLORS[GAME_PROPERTIES.TURN];
 }
 
@@ -277,8 +278,6 @@ if (window.location.search.includes("ai")) {
     startGameWithPlayer();
 }
 
-console.log("turn: " + GAME_PROPERTIES.TURN);
-
 function invalidMoveAlert() {
     console.log("TURN: " + GAME_PROPERTIES.TURN);
     if (alert.style.display === "none") {
@@ -438,7 +437,7 @@ function phaseTwoHandler(e) {
 const svg = document.getElementById("board").getSVGDocument();
 
 setUpClicks((e) => {
-    if (computerTurn == GAME_PROPERTIES.TURN) {
+    if (computerTurn === GAME_PROPERTIES.TURN) {
         console.log("ai going, wait please");
         console.log(GAME_PROPERTIES);
         console.log(computerTurn);
@@ -586,6 +585,10 @@ function getChildren(board, turn, gameProperties) {
                     } else { // Phase 2
                         let shifts = algorithm.possibleShifts(row, col);
                         for (let i = 0; i < shifts.length; i++) {
+
+                            if (board[shifts[i].X][shifts[i].Y].TURN !== null) {
+                                continue;
+                            }
                             let copyBoard = cloneBoard(board);
                             let copyGameProperties = cloneGameProperties(gameProperties);
                             let move = makeMoveProp(row, col, turn, true, shifts[i].X, shifts[i].Y, copyBoard);
@@ -694,6 +697,8 @@ function startGameWithComputer() {
     printBoard();
     setTurnText();
     console.log("BEEP IS " + computerTurn);
+    console.log(GAME_PROPERTIES);
+
     if (GAME_PROPERTIES.TURN === computerTurn) {
         phase1WithComputer();
     }
