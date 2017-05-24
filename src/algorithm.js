@@ -1,4 +1,4 @@
-import { STATES, PURPLE_PLAYER, YELLOW_PLAYER, PURPLE_TURN, YELLOW_TURN, Coordinate } from './common.js'
+import { PURPLE_TURN, YELLOW_TURN, Coordinate } from './common.js'
 
 const CENTER_POSITION = 3;
 
@@ -122,8 +122,8 @@ function isValidShift(move) {
         return false
     }
 
-    for (var i = 0; i < VALID_SHIFTS[row][move.COL].length; i++) {
-        let element = VALID_SHIFTS[row][move.COL][i];
+    for (let k = 0; k < VALID_SHIFTS[row][move.COL].length; k++) {
+        let element = VALID_SHIFTS[row][move.COL][k];
         if (element.X === shiftRow && element.Y === move.SHIFTCOL) {
             return true;
         }

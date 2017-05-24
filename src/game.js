@@ -14,7 +14,7 @@ const TILE = {
 };
 
 const MATRIX_SIZE = 7;
-const board = new Array(MATRIX_SIZE);
+let board = new Array(MATRIX_SIZE);
 
 function init() {
     for (let i = 0; i < MATRIX_SIZE; i++) {
@@ -255,7 +255,7 @@ function handleNewMills(move, gameProperties) {
 
 console.log("initializing game");
 
-startGame();
+startGameWithPlayer();
 
 console.log("turn: " + GAME_PROPERTIES.TURN);
 
@@ -281,8 +281,7 @@ function phaseOneHandler(e) {
         ////////////////////////////////////////////////////////////////
         if (GAME_PROPERTIES.CAPTURING && GAME_PROPERTIES.MILLS > 0) {
             console.log("CAPTURING");
-            move.TURN = otherPlayer();
-            if (removeSoldier(move, GAME_PROPERTIES)) {
+            if (removeSoldier(move, GAME_PROPERTIES, otherPlayer())) {
                 e.setAttribute("fill", SHARP_COLORS['default']);
                 GAME_PROPERTIES.MILLS -= 1;
                 if (GAME_PROPERTIES.MILLS === 0) {
@@ -291,6 +290,15 @@ function phaseOneHandler(e) {
                     setTurnText();
                     clearElement(turnPromptText);
                 }
+
+                if (PURPLE_PLAYER.AVAILABLE === 0 && YELLOW_PLAYER.AVAILABLE === 0 && !GAME_PROPERTIES.CAPTURING) {
+                    // phase 1 end
+                    console.log("------------ PHASE 1 COMPLETE ------------");
+                    document.getElementById("phaseText").innerHTML = "Phase 2: Move and capture";
+                    GAME_PROPERTIES.PHASE = 2;
+                    setMoveText();
+                }
+                console.log(GAME_PROPERTIES);
             } else {
                 invalidMoveAlert();
                 return;
@@ -344,7 +352,7 @@ function phaseTwoHandler(e) {
 
     if (GAME_PROPERTIES.CAPTURING && GAME_PROPERTIES.MILLS > 0) {
         // currently capturing
-        if (removeSoldier(move, GAME_PROPERTIES)) {
+        if (removeSoldier(move, GAME_PROPERTIES, otherPlayer())) {
             e.setAttribute("fill", SHARP_COLORS["default"]);
         } else {
             invalidMoveAlert();
@@ -365,6 +373,12 @@ function phaseTwoHandler(e) {
     } else {
         let x_original = parseInt(GAME_PROPERTIES.SOURCE.getAttribute("id")[0]);
         let y_original = parseInt(GAME_PROPERTIES.SOURCE.getAttribute("id")[1]);
+
+        if (x_original === x && y_original === y) {
+            e.setAttribute("stroke", null);
+            GAME_PROPERTIES.SOURCE = null;
+            return;
+        }
 
         if (board[x][y].TURN !== null) {
             setAlertText("Select a empty spot to move the piece to");
@@ -605,6 +619,8 @@ function phase1WithComputer() {
         if (computerTurn) {
             let bestM = alphabeta(board, depth, true, GAME_PROPERTIES.TURN, GAME_PROPERTIES, -Infinity, Infinity);
             board = bestM.BOARD;
+            updateBoardUI();
+
             GAME_PROPERTIES = bestM.PROPERTIES;
             GAME_PROPERTIES.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
             printBoard();
@@ -641,6 +657,8 @@ function phase2WithComputer() {
         if (computerTurn) {
             let bestM = alphabeta(board, depth, true, GAME_PROPERTIES.TURN, GAME_PROPERTIES, -Infinity, Infinity);
             board = bestM.BOARD;
+            updateBoardUI();
+
             GAME_PROPERTIES = bestM.PROPERTIES;
             GAME_PROPERTIES.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
             printBoard();
@@ -716,5 +734,22 @@ function startGameWithComputer() {
         console.log("Yellow Wins");
     } else {
         console.log("Purple Wins");
+    }
+}
+
+
+function updateBoardUI() {
+    for(let i=0; i<MATRIX_SIZE; i++) {
+        for (let j = 0; j < MATRIX_SIZE; j++) {
+            let piece = svg.getElementById(i.toString() + j.toString());
+            let current = board[i][j];
+            if (current.ISAVAILABLE) {
+                // You can place something at all
+                piece.setAttribute("fill", SHARP_COLORS['default']);
+                if (current.TURN !== null) {
+                    piece.setAttribute("fill", SHARP_COLORS[current.TURN]);
+                }
+            }
+        }
     }
 }
