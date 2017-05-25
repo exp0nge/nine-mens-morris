@@ -284,6 +284,7 @@ function handleNewMills(move, gameProperties) {
 console.log("initializing game");
 
 if (window.location.search.includes("ai")) {
+    document.getElementById("robot").remove();
     startGameWithComputer();
 } else {
     startGameWithPlayer();
@@ -370,7 +371,9 @@ function alertIfWinner() {
             (PURPLE_PLAYER.PLACED + PURPLE_PLAYER.AVAILABLE <= 2 ? "YELLOW" : "PURPLE") +
             " <a href='/'>(refresh)</a>";
         GAME_PROPERTIES.TURN = null;
+        return true;
     }
+    return false;
 }
 
 function phaseTwoHandler(e) {
