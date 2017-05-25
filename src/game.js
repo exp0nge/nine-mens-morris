@@ -381,7 +381,7 @@ function alertIfWinner() {
         clearElement(turnPromptText);
         clearElement(turnText);
         document.getElementById("phaseText").innerHTML = "WINNER " +
-            (PURPLE_PLAYER.PLACED + PURPLE_PLAYER.AVAILABLE <= 2 ? "YELLOW" : "PURPLE") +
+            (GAME_PROPERTIES.PURPLE_PLAYER.PLACED === 2 ? "YELLOW" : "PURPLE") +
             " <a href='/'>(refresh)</a>";
         GAME_PROPERTIES.TURN = null;
         return true;
@@ -485,13 +485,10 @@ setUpClicks((e) => {
 
 function scoreBoard(turn, maxPlayer, gameProperties, board, depth) {
     if (checkLose(gameProperties) !== null) {
-        console.log(checkLose(gameProperties) === turn);
-        console.log(board);
-        console.log(turn);
         if (checkLose(gameProperties) === turn) {
-            return -100000 - depth;
-        } else {
             return 100000 + depth;
+        } else {
+            return -100000 - depth;
         }
     }
     // Random number from 0 to 1 to choose between any equal board score randomly
@@ -599,10 +596,23 @@ function getChildren(board, turn, gameProperties) {
                                     copyBoard[i][j].TURN = turn;
                                     copyBoard[row][col].TURN = null;
 
+                                    copyBoard[row][col].ISMILL = false;
+                                    let mills = copyBoard[row][col].OTHER_MILLS;
+                                    if (mills !== null && mills !== undefined) {
+                                        // console.log("clearing mills for");
+                                        // console.log(mills);
+                                        for (let k = 0; k < mills.length; k++) {
+                                            // invalidate mills
+                                            copyBoard[mills[k][0]][mills[k][1]].ISMILL = false;
+                                            turn === common.YELLOW_TURN ?
+                                                copyGameProperties.YELLOW_PLAYER.MILLPIECES-- :
+                                                copyGameProperties.PURPLE_PLAYER.MILLPIECES--;
+                                        }
+                                    }
+
                                     let move = {
                                         ROW: i,
                                         COL: j,
-                                        GAME_PROPERTIES: copyGameProperties,
                                         BOARD: copyBoard,
                                         TURN: turn
                                     };
@@ -643,7 +653,7 @@ function getChildren(board, turn, gameProperties) {
 function handleNewMillsComputer(move, gameProperties) {
     let numMills = algorithm.countNewMills(move, gameProperties);
     let otherTurn = (move.TURN + 1) % 2;
-    while (numMills > 0 && !checkLose(gameProperties)) {
+    while (numMills > 0) {
         let removeMillPiece = false;
 
         let removingPiece = (otherTurn === common.PURPLE_TURN) ? gameProperties.PURPLE_PLAYER : gameProperties.YELLOW_PLAYER;
@@ -678,6 +688,7 @@ function phase1WithComputer() {
             // console.log("BEEP PLAYING");
             let bestM = alphabeta(board, depth, true, GAME_PROPERTIES.TURN, GAME_PROPERTIES, -Infinity, Infinity);
             board = bestM.BOARD;
+            console.log(board);
             updateBoardUI();
 
             GAME_PROPERTIES = bestM.PROPERTIES;
@@ -698,7 +709,7 @@ function phase2WithComputer() {
             let bestM = alphabeta(board, depth, true, GAME_PROPERTIES.TURN, GAME_PROPERTIES, -Infinity, Infinity);
             board = bestM.BOARD;
 
-            // console.log(board);
+            console.log(board);
             updateBoardUI();
 
             GAME_PROPERTIES = bestM.PROPERTIES;
