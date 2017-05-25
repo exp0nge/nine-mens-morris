@@ -707,7 +707,14 @@ function phase2WithComputer() {
     if (GAME_PROPERTIES.AI_TURN === GAME_PROPERTIES.TURN) {
         setTimeout(() => {
             // console.log("BEEP PHASE 2 PLAYING");
-            let bestM = alphabeta(board, depth, true, GAME_PROPERTIES.TURN, GAME_PROPERTIES, -Infinity, Infinity);
+            let bestM;
+            if (GAME_PROPERTIES.TURN === common.YELLOW_TURN ?
+                    GAME_PROPERTIES.YELLOW_PLAYER.PLACED === 3 :
+                    GAME_PROPERTIES.PURPLE_PLAYER.PLACED === 3) {
+                bestM = alphabeta(board, 2, true, GAME_PROPERTIES.TURN, GAME_PROPERTIES, -Infinity, Infinity);
+            } else {
+                bestM = alphabeta(board, depth, true, GAME_PROPERTIES.TURN, GAME_PROPERTIES, -Infinity, Infinity);
+            }
             board = bestM.BOARD;
 
             console.log(board);
