@@ -126,7 +126,7 @@ function setCaptureText(message) {
         defaultMessage = "Click on a YELLOW piece to remove";
     }
 
-    if (isMillBreakable()) { // Removing from mill is possible if only mills are left
+    if (isMillBreakable(GAME_PROPERTIES)) { // Removing from mill is possible if only mills are left
         defaultMessage += " that is part of a mill";
     } else {
         defaultMessage += " that is not part of a mill";
@@ -260,9 +260,9 @@ function shiftSoldier(move, gameProperties) {
     return false;
 }
 
-function isMillBreakable() {
-    let removingPiece = (((GAME_PROPERTIES.TURN + 1) % 2) === PURPLE_TURN) ? PURPLE_PLAYER : YELLOW_PLAYER;
-    return removingPiece.PLACED > 0 && (removingPiece.PLACED - removingPiece.MILLPIECES === 0);
+function isMillBreakable(gameProperties) {
+    let removingPiece = (((gameProperties.TURN + 1) % 2) === common.PURPLE_TURN) ? gameProperties.PURPLE_PLAYER : gameProperties.YELLOW_PLAYER;
+    return removingPiece.PLACED > 0 && removingPiece.PLACED - removingPiece.MILLPIECES === 0;
 }
 
 function handleNewMills(move, gameProperties) {
@@ -275,7 +275,7 @@ function handleNewMills(move, gameProperties) {
             message = "Click on a YELLOW piece to remove";
         }
 
-        if (isMillBreakable()) { // Removing from mill is possible if only mills are left
+        if (isMillBreakable(gameProperties)) { // Removing from mill is possible if only mills are left
             message += " that is part of a mill";
         } else {
             message += " that is not part of a mill";
@@ -484,7 +484,7 @@ setUpClicks((e) => {
 });
 
 
-function scoreBoard(turn, maxPlayer, gameProperties, board, depth) {
+function scoreBoard(turn, maxPlayer, gameProperties, depth) {
     if (checkLose(gameProperties) !== null) {
         if (checkLose(gameProperties) === turn) {
             return 100000 + depth;
@@ -505,7 +505,7 @@ function scoreBoard(turn, maxPlayer, gameProperties, board, depth) {
 function alphabeta(board, depth, maxPlayer, turn, gameProperties, alpha, beta) {
     if (depth === 0 || (checkLose(gameProperties) !== null)) {
         return {
-            VALUE: scoreBoard(turn, maxPlayer, gameProperties, board, depth),
+            VALUE: scoreBoard(turn, maxPlayer, gameProperties, depth),
             BOARD: board,
             PROPERTIES: gameProperties
         };
@@ -713,7 +713,7 @@ function phase2WithComputer() {
                     GAME_PROPERTIES.PURPLE_PLAYER.PLACED === 3) {
                 bestM = alphabeta(board, 2, true, GAME_PROPERTIES.TURN, GAME_PROPERTIES, -Infinity, Infinity);
             } else {
-                bestM = alphabeta(board, depth, true, GAME_PROPERTIES.TURN, GAME_PROPERTIES, -Infinity, Infinity);
+                bestM = alphabeta(board, 3, true, GAME_PROPERTIES.TURN, GAME_PROPERTIES, -Infinity, Infinity);
             }
             board = bestM.BOARD;
 
