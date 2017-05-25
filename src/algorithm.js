@@ -33,15 +33,13 @@ function checkMill(move, start, end, checkRow, gameProperties) {
         let tileState = checkRow ? move.BOARD[move.ROW][i] : move.BOARD[i][move.COL];
         if (tileState.ISAVAILABLE === true && tileState.TURN === move.TURN) {
             count += 1;
-            if (tileState !== move.BOARD[move.ROW][move.COL]) {
-                mills.push(checkRow ? [
-                    [move.ROW],
-                    [i]
-                ] : [
-                    [i],
-                    [move.COL]
-                ]);
-            }
+            mills.push(checkRow ? [
+                [move.ROW],
+                [i]
+            ] : [
+                [i],
+                [move.COL]
+            ]);
         }
     }
     if (count === 3) {
