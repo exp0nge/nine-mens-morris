@@ -383,7 +383,7 @@ function alertIfWinner() {
         document.getElementById("phaseText").innerHTML = "WINNER " +
             (GAME_PROPERTIES.PURPLE_PLAYER.PLACED === 2 ? "YELLOW" : "PURPLE") +
             " <a href='/'>(refresh)</a>";
-        GAME_PROPERTIES.TURN = null;
+        GAME_PROPERTIES = null;
         return true;
     }
     return false;
@@ -680,7 +680,7 @@ function handleNewMillsComputer(move, gameProperties) {
     }
 }
 
-let depth = 3; // TODO seems like the max reasonable depth is 4, but 3 works pretty fast
+let depth = 4; // TODO seems like the max reasonable depth is 4, but 3 works pretty fast
 
 function phase1WithComputer() {
     if (GAME_PROPERTIES.AI_TURN === GAME_PROPERTIES.TURN) {
