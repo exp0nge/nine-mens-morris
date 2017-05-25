@@ -233,11 +233,6 @@ function shiftSoldier(move, gameProperties) {
         // reset state of current
         move.BOARD[move.ROW][move.COL].TURN = null;
         if (move.BOARD[move.ROW][move.COL].ISMILL === true) {
-            if (move.TURN === common.PURPLE_TURN) {
-                gameProperties.PURPLE_PLAYER.MILLPIECES--;
-            } else {
-                gameProperties.YELLOW_PLAYER.MILLPIECES--;
-            }
             let mills = move.BOARD[move.ROW][move.COL].OTHER_MILLS;
             move.BOARD[move.ROW][move.COL].ISMILL = false;
             if (mills !== null && mills !== undefined) {
