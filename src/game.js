@@ -362,8 +362,8 @@ function phaseOneHandler(e) {
 }
 
 function alertIfWinner() {
-    if ((PURPLE_PLAYER.PLACED + PURPLE_PLAYER.AVAILABLE <= 2) ||
-        (YELLOW_PLAYER.PLACED + YELLOW_PLAYER.AVAILABLE <= 2)) {
+    if ((GAME_PROPERTIES.PURPLE_PLAYER.PLACED < 3 && GAME_PROPERTIES.PURPLE_PLAYER.AVAILABLE <= 0) ||
+        (GAME_PROPERTIES.YELLOW_PLAYER.PLACED < 3 && GAME_PROPERTIES.YELLOW_PLAYER.AVAILABLE <= 0)) {
         clearElement(turnPromptText);
         clearElement(turnText);
         document.getElementById("phaseText").innerHTML = "WINNER " +
@@ -685,7 +685,6 @@ function phase2WithComputer() {
             GAME_PROPERTIES.AI_TURN = otherPlayer();
             setTurnText();
             clearElement(turnPromptText);
-            setCaptureText();
 
             alertIfWinner();
         }, 500);
