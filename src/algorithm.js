@@ -129,7 +129,7 @@ const VALID_SHIFTS = {
 function isValidShift(move) {
 
     if (move.FLYING !== null && move.FLYING !== undefined) {
-        console.log("flying");
+        // console.log("flying");
         return true;
     }
 
