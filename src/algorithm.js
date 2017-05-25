@@ -28,10 +28,20 @@ function countNewMills(move, gameProperties) {
 
 function checkMill(move, start, end, checkRow, gameProperties) {
     let count = 0;
+    let mills = [];
     for (let i = start; i <= end; i++) {
         let tileState = checkRow ? move.BOARD[move.ROW][i] : move.BOARD[i][move.COL];
         if (tileState.ISAVAILABLE === true && tileState.TURN === move.TURN) {
             count += 1;
+            if (tileState !== move.BOARD[move.ROW][move.COL]) {
+                mills.push(checkRow ? [
+                    [move.ROW],
+                    [i]
+                ] : [
+                    [i],
+                    [move.COL]
+                ]);
+            }
         }
     }
     if (count === 3) {
@@ -40,6 +50,11 @@ function checkMill(move, start, end, checkRow, gameProperties) {
             let tileState = checkRow ? move.BOARD[move.ROW][i] : move.BOARD[i][move.COL];
             if (tileState.ISAVAILABLE === true && tileState.ISMILL === false) {
                 tileState.ISMILL = true;
+                if (tileState.OTHER_MILLS !== undefined && tileState.OTHER_MILLS !== null) {
+                    tileState.OTHER_MILLS.concat(mills);
+                } else {
+                    tileState.OTHER_MILLS = mills;
+                }
                 if (move.TURN === YELLOW_TURN) {
                     gameProperties.YELLOW_PLAYER.MILLPIECES += 1;
                 } else if (move.TURN === PURPLE_TURN) {

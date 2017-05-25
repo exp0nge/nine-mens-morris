@@ -98,7 +98,7 @@ const turnPromptText = document.getElementById("turnPromptText");
 function setTurnText(message) {
     turnText.style.display = "block";
     turnText.innerHTML = message || GAME_PROPERTIES.TURN ? "YELLOW (1)" : "PURPLE (0)";
-    if (GAME_PROPERTIES.TURN === computerTurn) {
+    if (GAME_PROPERTIES.TURN === GAME_PROPERTIES.AI_TURN) {
         turnText.innerHTML += " AI";
     }
 
@@ -192,6 +192,8 @@ function removeSoldier(move, gameProperties, otherTurn) {
     // When removing, we remove the piece with that color
     let removingPiece = (otherTurn === common.PURPLE_TURN) ? gameProperties.PURPLE_PLAYER : gameProperties.YELLOW_PLAYER;
     if (!algorithm.isRemovable(move, otherTurn)) {
+        console.log(board);
+        console.log(move);
         return false;
     }
 
@@ -225,7 +227,16 @@ function shiftSoldier(move, gameProperties) {
             } else {
                 gameProperties.YELLOW_PLAYER.MILLPIECES--;
             }
+            let mills = move.BOARD[move.ROW][move.COL].OTHER_MILLS;
             move.BOARD[move.ROW][move.COL].ISMILL = false;
+            if (mills !== null && mills !== undefined) {
+                console.log("clearing mills for");
+                console.log(mills);
+                for (let i = 0; i < mills.length; i++) {
+                    // invalidate mills
+                    move.BOARD[mills[i][0]][mills[i][1]].ISMILL = false;
+                }
+            }
         }
 
         // update color of new
@@ -324,7 +335,6 @@ function phaseOneHandler(e) {
                 }
 
                 checkPhaseOneEnd();
-                console.log(GAME_PROPERTIES);
             } else {
                 invalidMoveAlert();
                 return;
@@ -437,16 +447,16 @@ function phaseTwoHandler(e) {
 const svg = document.getElementById("board").getSVGDocument();
 
 setUpClicks((e) => {
-    if (computerTurn === GAME_PROPERTIES.TURN) {
+    if (GAME_PROPERTIES.AI_TURN === GAME_PROPERTIES.TURN) {
         console.log("ai going, wait please");
         console.log(GAME_PROPERTIES);
-        console.log(computerTurn);
+        console.log(GAME_PROPERTIES.AI_TURN);
         return;
     }
     if (GAME_PROPERTIES.PHASE === 1 || GAME_PROPERTIES.MILLS > 0) {
         phaseOneHandler(e);
         console.log("calling beep");
-        console.log(computerTurn);
+        console.log(GAME_PROPERTIES.AI_TURN);
         console.log(GAME_PROPERTIES);
         phase1WithComputer();
     } else if (GAME_PROPERTIES.PHASE === 2) {
@@ -610,8 +620,6 @@ function getChildren(board, turn, gameProperties) {
     return children;
 }
 
-let computerTurn = false;
-
 function handleNewMillsComputer(move, gameProperties) {
     let numMills = algorithm.countNewMills(move, gameProperties);
     let otherTurn = (move.TURN + 1) % 2;
@@ -645,7 +653,7 @@ function handleNewMillsComputer(move, gameProperties) {
 let depth = 3; // TODO seems like the max reasonable depth is 4, but 3 works pretty fast
 
 function phase1WithComputer() {
-    if (computerTurn == GAME_PROPERTIES.TURN) {
+    if (GAME_PROPERTIES.AI_TURN === GAME_PROPERTIES.TURN) {
         setTimeout(() => {
             console.log("BEEP PLAYING");
             let bestM = alphabeta(board, depth, true, GAME_PROPERTIES.TURN, GAME_PROPERTIES, -Infinity, Infinity);
@@ -655,7 +663,7 @@ function phase1WithComputer() {
             GAME_PROPERTIES = bestM.PROPERTIES;
             GAME_PROPERTIES.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
             printBoard();
-            computerTurn = otherPlayer();
+            GAME_PROPERTIES.AI_TURN = otherPlayer();
             setTurnText();
             clearElement(turnPromptText);
             checkPhaseOneEnd();
@@ -664,7 +672,7 @@ function phase1WithComputer() {
 }
 
 function phase2WithComputer() {
-    if (computerTurn == GAME_PROPERTIES.TURN) {
+    if (GAME_PROPERTIES.AI_TURN === GAME_PROPERTIES.TURN) {
         setTimeout(() => {
             console.log("BEEP PHASE 2 PLAYING");
             let bestM = alphabeta(board, depth, true, GAME_PROPERTIES.TURN, GAME_PROPERTIES, -Infinity, Infinity);
@@ -674,7 +682,7 @@ function phase2WithComputer() {
             GAME_PROPERTIES = bestM.PROPERTIES;
             GAME_PROPERTIES.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
             printBoard();
-            computerTurn = otherPlayer();
+            GAME_PROPERTIES.AI_TURN = otherPlayer();
             setTurnText();
             clearElement(turnPromptText);
             setCaptureText();
@@ -693,13 +701,13 @@ function startGameWithComputer() {
      */
 
     GAME_PROPERTIES.TURN = coinFlip();
-    computerTurn = coinFlip();
+    GAME_PROPERTIES.AI_TURN = coinFlip();
     printBoard();
     setTurnText();
-    console.log("BEEP IS " + computerTurn);
+    console.log("BEEP IS " + GAME_PROPERTIES.AI_TURN);
     console.log(GAME_PROPERTIES);
 
-    if (GAME_PROPERTIES.TURN === computerTurn) {
+    if (GAME_PROPERTIES.TURN === GAME_PROPERTIES.AI_TURN) {
         phase1WithComputer();
     }
 
