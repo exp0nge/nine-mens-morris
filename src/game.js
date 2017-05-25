@@ -315,7 +315,7 @@ function invalidMoveAlert() {
 }
 
 function checkPhaseOneEnd() {
-    if (GAME_PROPERTIES.PHASE == 1 &&
+    if (GAME_PROPERTIES.PHASE === 1 &&
         GAME_PROPERTIES.PURPLE_PLAYER.AVAILABLE === 0 &&
         GAME_PROPERTIES.YELLOW_PLAYER.AVAILABLE === 0 &&
         !GAME_PROPERTIES.CAPTURING) {
@@ -476,6 +476,7 @@ setUpClicks((e) => {
         // console.log(GAME_PROPERTIES);
         phase1WithComputer();
     } else if (GAME_PROPERTIES.PHASE === 2) {
+        setMoveText();
         phaseTwoHandler(e);
         phase2WithComputer();
     }
@@ -718,6 +719,8 @@ function phase2WithComputer() {
             GAME_PROPERTIES.AI_TURN = otherPlayer();
             setTurnText();
             clearElement(turnPromptText);
+
+            setMoveText();
 
             alertIfWinner();
         }, 500);
