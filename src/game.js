@@ -262,7 +262,7 @@ function shiftSoldier(move, gameProperties) {
 
 function isMillBreakable() {
     let removingPiece = (((GAME_PROPERTIES.TURN + 1) % 2) === PURPLE_TURN) ? PURPLE_PLAYER : YELLOW_PLAYER;
-    return removingPiece.PLACED - removingPiece.MILLPIECES === 0;
+    return removingPiece.PLACED > 0 && (removingPiece.PLACED - removingPiece.MILLPIECES === 0);
 }
 
 function handleNewMills(move, gameProperties) {
