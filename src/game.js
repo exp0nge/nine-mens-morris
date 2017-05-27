@@ -1,7 +1,7 @@
 import * as algorithm from './algorithm.js';
 import { setUpClicks } from './events.js';
 import { SHARP_COLORS, STATES, makeMoveProp, ERRORS, DIALOG, PURPLE_PLAYER, YELLOW_PLAYER, PURPLE_TURN, YELLOW_TURN } from './common.js';
-import { setUpStringFormat } from './utils.js';
+import { setUpStringFormat, getQueryString } from './utils.js';
 
 setUpStringFormat();
 import * as common from './common.js';
@@ -292,9 +292,11 @@ function handleNewMills(move, gameProperties) {
 // console.log("initializing game");
 
 if (window.location.search.includes("ai")) {
-    document.getElementById("robot").remove();
+    document.getElementById("robot").style.display = "none";
+    document.getElementById("depth-control").style.display = "block";
     startGameWithComputer();
 } else {
+    document.getElementById("depth-control").style.display = "none";
     startGameWithPlayer();
 }
 
@@ -677,6 +679,12 @@ function handleNewMillsComputer(move, gameProperties) {
 }
 
 let depth = 4; // TODO seems like the max reasonable depth is 4, but 3 works pretty fast
+
+if (window.location.search.includes("depth")) {
+    depth = getQueryString()["depth"];
+}
+
+document.getElementById("depth").value = depth;
 
 function phase1WithComputer() {
     if (GAME_PROPERTIES.AI_TURN === GAME_PROPERTIES.TURN) {

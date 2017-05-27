@@ -7,9 +7,7 @@
 </head>
 <style media="screen">
     #board-container {
-        width: 500px;
-        height: 500px;
-        margin: auto;
+        max-width: 600px;
     }
     
     #alert {
@@ -43,7 +41,7 @@
 <body>
 
     <div id="wrapper">
-        <section class="hero">
+        <section class="hero is-primary is-bold">
             <div class="hero-body">
                 <div class="container">
                     <h1 class="title">
@@ -72,11 +70,12 @@
             </div>
         </section>
 
-        <div class="container">
+
+        <div class="container" id="board-container">
             <div class="card">
                 <div class="card-content">
                     <p class="title">
-                        <div id="board-container" class="center">
+                        <div class="center">
                             <object id="board" data="./public/board.svg" type="image/svg+xml"></object>
                         </div>
                         <div id="alert">
@@ -84,8 +83,19 @@
                         </div>
                     </p>
                 </div>
+                <footer class="card-footer" id="depth-control">
+                    <form class="center">
+                        <p class="control card-footer-item">
+                            <span class="tag is-primary is-medium" style="margin-right: 5px;">Depth</span>
+                            <input type="hidden" value="True" name="ai" />
+                            <input id="depth" type="number" class="input" min="0" value="3" style="margin-right: 5px;" name="depth" />
+                            <button class=" button is-primary ">Submit</button>
+                        </p>
+                    </form>
+                </footer>
             </div>
         </div>
+
 
 
         <section id="robot" class="section columns">
@@ -93,30 +103,27 @@
                 <div class="heading">
                     <h2 class="subtitle">
                         <div class="box center">
-                            <a href="?ai=True">AI MODE <br> <img src="./public/robot.png" width="80px" height="80px" alt="ai mode robot" /></a>
+                            <a href="?ai=True ">AI MODE <br> <img src="./public/robot.png " width="80px " height="80px " alt="ai mode robot " /></a>
                         </div>
                     </h2>
                 </div>
             </div>
         </section>
 
-
-
     </div>
 
 
-    <footer class="footer">
-        <div class="container">
-            <div class="content has-text-centered">
+    <footer class="footer" style="margin-top: 10px;">
+        <div class="container ">
+            <div class="content has-text-centered ">
                 <p>
                     Created by
-                    <a href="" https://github.com/cyang ">Christopher Yang</a> + <a href="https://github.com/exp0nge ">MD R. Islam</a> 
-        for CS 448 with Professor Lucci @ City College of New York.
-                </p>
+                    <a href=" " https://github.com/cyang ">Christopher Yang</a> + <a href="https://github.com/exp0nge ">MD R. Islam</a> for CS 448 with Professor Lucci @ City College of New York.
+                        </p>
             </div>
         </div>
-    </footer>
-    <script src="./lib/main-bundle.js " charset="utf-8 "></script>
+        </footer>
+        <script src="./lib/main-bundle.js " charset="utf-8 "></script>
 </body>
 
 </html>
