@@ -7,8 +7,8 @@
 </head>
 <style media="screen">
     #board-container {
-        width: 400px;
-        height: 400px;
+        width: 500px;
+        height: 500px;
         margin: auto;
     }
     
@@ -23,29 +23,100 @@
         background: blue;
     }
     
-    #robot {
+    .center {
         margin: auto;
         text-align: center;
     }
+    
+    body {
+        display: flex;
+        min-height: 100vh;
+        flex-direction: column;
+    }
+    
+    #wrapper {
+        flex: 1;
+    }
 </style>
+<link href="./public/bulma.css" rel="stylesheet">
 
 <body>
-    <div id="phase">
-        <h2 id="phaseText">Phase 1: Place and capture pieces</h2>
+
+    <div id="wrapper">
+        <section class="hero">
+            <div class="hero-body">
+                <div class="container">
+                    <h1 class="title">
+                        Nine Mens Morris
+                    </h1>
+                    <h2 class="subtitle">
+                        A game to demonstrate an understanding of minimax with alpha-beta pruning.
+                    </h2>
+                </div>
+            </div>
+        </section>
+
+
+        <section class="section">
+            <div class="container">
+                <div class="heading">
+                    <div id="phase">
+                        <h1 id="phaseText" class="title">Phase 1: Place and capture pieces</h1>
+                    </div>
+                    <h2 class="subtitle">
+                        <div id="turn">
+                            <h3 id="turnText"></h3> <span id="turnPromptText"></span>
+                        </div>
+                    </h2>
+                </div>
+            </div>
+        </section>
+
+        <div class="container">
+            <div class="card">
+                <div class="card-content">
+                    <p class="title">
+                        <div id="board-container" class="center">
+                            <object id="board" data="./public/board.svg" type="image/svg+xml"></object>
+                        </div>
+                        <div id="alert">
+                            <p id="alertText"></p>
+                        </div>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+
+        <section id="robot" class="section columns">
+            <div class="container column is-2 is-offset-5">
+                <div class="heading">
+                    <h2 class="subtitle">
+                        <div class="box center">
+                            <a href="?ai=True">AI MODE <br> <img src="./public/robot.png" width="80px" height="80px" alt="ai mode robot" /></a>
+                        </div>
+                    </h2>
+                </div>
+            </div>
+        </section>
+
+
+
     </div>
-    <div id="turn">
-        <h3 id="turnText"></h3> <span id="turnPromptText"></span>
-    </div>
-    <div id="board-container">
-        <object id="board" data="./public/board.svg" type="image/svg+xml"></object>
-    </div>
-    <div id="alert">
-        <p id="alertText"></p>
-    </div>
-    <div id="robot">
-        <a href="?ai=True"><img src="./public/robot.png" width="100px" height="100px" /></a>
-    </div>
-    <script src="./lib/main-bundle.js" charset="utf-8"></script>
+
+
+    <footer class="footer">
+        <div class="container">
+            <div class="content has-text-centered">
+                <p>
+                    Created by
+                    <a href="" https://github.com/cyang ">Christopher Yang</a> + <a href="https://github.com/exp0nge ">MD R. Islam</a> 
+        for CS 448 with Professor Lucci @ City College of New York.
+                </p>
+            </div>
+        </div>
+    </footer>
+    <script src="./lib/main-bundle.js " charset="utf-8 "></script>
 </body>
 
 </html>

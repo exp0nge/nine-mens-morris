@@ -99,7 +99,7 @@ function setTurnText(message) {
     turnText.style.display = "block";
     turnText.innerHTML = message || GAME_PROPERTIES.TURN ? "YELLOW (1)" : "PURPLE (0)";
     if (GAME_PROPERTIES.TURN === GAME_PROPERTIES.AI_TURN) {
-        turnText.innerHTML += " AI";
+        turnText.innerHTML += " AI is thinking...";
     }
 
     turnText.style.backgroundColor = SHARP_COLORS[GAME_PROPERTIES.TURN];
@@ -704,8 +704,8 @@ function phase2WithComputer() {
             // console.log("BEEP PHASE 2 PLAYING");
             let bestM;
             if (GAME_PROPERTIES.TURN === common.YELLOW_TURN ?
-                    GAME_PROPERTIES.YELLOW_PLAYER.PLACED === 3 :
-                    GAME_PROPERTIES.PURPLE_PLAYER.PLACED === 3) {
+                GAME_PROPERTIES.YELLOW_PLAYER.PLACED === 3 :
+                GAME_PROPERTIES.PURPLE_PLAYER.PLACED === 3) {
                 bestM = alphabeta(board, 2, true, GAME_PROPERTIES.TURN, GAME_PROPERTIES, -Infinity, Infinity);
             } else {
                 bestM = alphabeta(board, 3, true, GAME_PROPERTIES.TURN, GAME_PROPERTIES, -Infinity, Infinity);
