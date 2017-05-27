@@ -83,26 +83,27 @@
                         </div>
                     </p>
                 </div>
-                <footer class="card-footer" id="depth-control">
-                    <form class="center">
-                        <p class="control card-footer-item">
-                            <span class="tag is-primary is-medium" style="margin-right: 5px;">Depth</span>
-                            <input type="hidden" value="True" name="ai" />
-                            <input id="depth" type="number" class="input" min="0" value="3" style="margin-right: 5px;" name="depth" />
-                            <button class=" button is-primary ">Submit</button>
-                        </p>
-                    </form>
-                </footer>
+                <div id="depth-control">
+                    <footer class="card-footer center">
+                        <article class="message is-danger container">
+                            <div class="message-body">
+                                Entering depths greater than 3 will result in much longer wait times.
+
+                                <form class="center">
+                                    <p class="control card-footer-item">
+                                        <span class="tag is-primary is-medium" style="margin-right: 5px;">Depth</span>
+                                        <input type="hidden" value="True" name="ai" />
+                                        <input id="depth" type="number" class="input" min="0" value="3" style="margin-right: 5px;" name="depth" />
+                                        <button class=" button is-primary ">Submit</button>
+                                    </p>
+                                </form>
+                            </div>
+                        </article>
+                    </footer>
+
+
+                </div>
             </div>
-            <hr>
-            <article class="message is-danger">
-                <div class="message-header">
-                    <p><strong>Danger</strong>!</p>
-                </div>
-                <div class="message-body">
-                    Entering depths greater than 3 will result in much longer wait times.
-                </div>
-            </article>
         </div>
 
         <section id="robot" class="section columns">

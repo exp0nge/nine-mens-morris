@@ -678,7 +678,7 @@ function handleNewMillsComputer(move, gameProperties) {
     }
 }
 
-let depth = 4; // TODO seems like the max reasonable depth is 4, but 3 works pretty fast
+let depth = 3; // TODO seems like the max reasonable depth is 4, but 3 works pretty fast
 
 if (window.location.search.includes("depth")) {
     depth = getQueryString()["depth"];
