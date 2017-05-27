@@ -594,17 +594,19 @@ function getChildren(board, turn, gameProperties) {
                                     copyBoard[i][j].TURN = turn;
                                     copyBoard[row][col].TURN = null;
 
-                                    copyBoard[row][col].ISMILL = false;
-                                    let mills = copyBoard[row][col].OTHER_MILLS;
-                                    if (mills !== null && mills !== undefined) {
-                                        // console.log("clearing mills for");
-                                        // console.log(mills);
-                                        for (let k = 0; k < mills.length; k++) {
-                                            // invalidate mills
-                                            copyBoard[mills[k][0]][mills[k][1]].ISMILL = false;
-                                            turn === common.YELLOW_TURN ?
-                                                copyGameProperties.YELLOW_PLAYER.MILLPIECES-- :
-                                                copyGameProperties.PURPLE_PLAYER.MILLPIECES--;
+                                    if (copyBoard[row][col].ISMILL === true) {
+                                        copyBoard[row][col].ISMILL = false;
+                                        let mills = copyBoard[row][col].OTHER_MILLS;
+                                        if (mills !== null && mills !== undefined) {
+                                            // console.log("clearing mills for");
+                                            // console.log(mills);
+                                            for (let k = 0; k < mills.length; k++) {
+                                                // invalidate mills
+                                                copyBoard[mills[k][0]][mills[k][1]].ISMILL = false;
+                                                turn === common.YELLOW_TURN ?
+                                                    copyGameProperties.YELLOW_PLAYER.MILLPIECES-- :
+                                                    copyGameProperties.PURPLE_PLAYER.MILLPIECES--;
+                                            }
                                         }
                                     }
 
@@ -696,6 +698,7 @@ function phase1WithComputer() {
             updateBoardUI();
 
             GAME_PROPERTIES = bestM.PROPERTIES;
+            console.log(GAME_PROPERTIES);
             GAME_PROPERTIES.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
             // printBoard();
             GAME_PROPERTIES.AI_TURN = otherPlayer();
@@ -714,9 +717,9 @@ function phase2WithComputer() {
             if (GAME_PROPERTIES.TURN === common.YELLOW_TURN ?
                 GAME_PROPERTIES.YELLOW_PLAYER.PLACED === 3 :
                 GAME_PROPERTIES.PURPLE_PLAYER.PLACED === 3) {
-                bestM = alphabeta(board, 2, true, GAME_PROPERTIES.TURN, GAME_PROPERTIES, -Infinity, Infinity);
+                bestM = alphabeta(board, depth, true, GAME_PROPERTIES.TURN, GAME_PROPERTIES, -Infinity, Infinity);
             } else {
-                bestM = alphabeta(board, 3, true, GAME_PROPERTIES.TURN, GAME_PROPERTIES, -Infinity, Infinity);
+                bestM = alphabeta(board, depth, true, GAME_PROPERTIES.TURN, GAME_PROPERTIES, -Infinity, Infinity);
             }
             board = bestM.BOARD;
 
@@ -724,6 +727,8 @@ function phase2WithComputer() {
             updateBoardUI();
 
             GAME_PROPERTIES = bestM.PROPERTIES;
+            console.log(GAME_PROPERTIES);
+
             GAME_PROPERTIES.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
             // printBoard();
             GAME_PROPERTIES.AI_TURN = otherPlayer();
