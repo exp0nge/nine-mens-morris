@@ -204,19 +204,22 @@ function removeSoldier(move, gameProperties, otherTurn) {
         // removingPiece
         return true;
     } else { // is a mill
-        if (removingPiece.PLACED > 0 && removingPiece.PLACED - removingPiece.MILLPIECES === 0) { // Removing from mill is possible if only mills are left
+        if (removingPiece.PLACED > 0 && removingPiece.PLACED - removingPiece.MILLPIECES <= 0) { // Removing from mill is possible if only mills are left
             let piece = move.BOARD[move.ROW][move.COL];
             piece.TURN = null;
             piece.ISMILL = false;
             removingPiece.MILLPIECES--;
 
             let mills = piece.OTHER_MILLS;
+            piece.OTHER_MILLS = [];
             if (mills !== null && mills !== undefined) {
                 // console.log("clearing mills for");
                 // console.log(mills);
                 for (let i = 0; i < mills.length; i++) {
                     // invalidate mills
-                    move.BOARD[mills[i][0]][mills[i][1]].ISMILL = false;
+                    move.BOARD[mills[i].ROW][mills[i].COL].ISMILL = false;
+                    move.BOARD[mills[i].ROW][mills[i].COL].OTHER_MILLS = [];
+
                     removingPiece.MILLPIECES--;
                 }
             }
@@ -238,13 +241,16 @@ function shiftSoldier(move, gameProperties) {
             move.TURN === common.PURPLE_TURN ?
                 gameProperties.PURPLE_PLAYER.MILLPIECES-- : gameProperties.YELLOW_PLAYER.MILLPIECES--;
             let mills = move.BOARD[move.ROW][move.COL].OTHER_MILLS;
-            move.BOARD[move.ROW][move.COL].ISMILL = false;
+            move.BOARD[move.ROW][move.COL].OTHER_MILLS = [];
+
             if (mills !== null && mills !== undefined) {
                 // console.log("clearing mills for");
                 // console.log(mills);
                 for (let i = 0; i < mills.length; i++) {
                     // invalidate mills
-                    move.BOARD[mills[i][0]][mills[i][1]].ISMILL = false;
+                    move.BOARD[mills[i].ROW][mills[i].COL].ISMILL = false;
+                    move.BOARD[mills[i].ROW][mills[i].COL].OTHER_MILLS = [];
+
                     move.TURN === common.PURPLE_TURN ?
                         gameProperties.PURPLE_PLAYER.MILLPIECES-- : gameProperties.YELLOW_PLAYER.MILLPIECES--;
                 }
@@ -261,7 +267,7 @@ function shiftSoldier(move, gameProperties) {
 
 function isMillBreakable(gameProperties) {
     let removingPiece = (((gameProperties.TURN + 1) % 2) === common.PURPLE_TURN) ? gameProperties.PURPLE_PLAYER : gameProperties.YELLOW_PLAYER;
-    return removingPiece.PLACED > 0 && removingPiece.PLACED - removingPiece.MILLPIECES === 0;
+    return removingPiece.PLACED > 0 && removingPiece.PLACED - removingPiece.MILLPIECES <= 0;
 }
 
 function handleNewMills(move, gameProperties) {
@@ -605,12 +611,14 @@ function getChildren(board, turn, gameProperties) {
                                             copyGameProperties.PURPLE_PLAYER.MILLPIECES--;
 
                                         let mills = copyBoard[row][col].OTHER_MILLS;
+                                        copyBoard[row][col].OTHER_MILLS = [];
+
                                         if (mills !== null && mills !== undefined) {
                                             // console.log("clearing mills for");
                                             // console.log(mills);
                                             for (let k = 0; k < mills.length; k++) {
                                                 // invalidate mills
-                                                copyBoard[mills[k][0]][mills[k][1]].ISMILL = false;
+                                                copyBoard[mills[k].ROW][mills[k].COL].ISMILL = false;
                                                 turn === common.YELLOW_TURN ?
                                                     copyGameProperties.YELLOW_PLAYER.MILLPIECES-- :
                                                     copyGameProperties.PURPLE_PLAYER.MILLPIECES--;
@@ -665,7 +673,7 @@ function handleNewMillsComputer(move, gameProperties) {
         let removeMillPiece = false;
 
         let removingPiece = (otherTurn === common.PURPLE_TURN) ? gameProperties.PURPLE_PLAYER : gameProperties.YELLOW_PLAYER;
-        if (removingPiece.PLACED > 0 && removingPiece.PLACED - removingPiece.MILLPIECES === 0) { // Removing from mill is possible if only mills are left
+        if (removingPiece.PLACED > 0 && removingPiece.PLACED - removingPiece.MILLPIECES <= 0) { // Removing from mill is possible if only mills are left
             removeMillPiece = true;
         }
 

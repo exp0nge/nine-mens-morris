@@ -38,7 +38,7 @@ function checkMill(move, start, end, checkRow, gameProperties) {
         // change ISMILL to true
         for (let i = start; i <= end; i++) {
             let tileState = checkRow ? move.BOARD[move.ROW][i] : move.BOARD[i][move.COL];
-            if (tileState.ISAVAILABLE === true && tileState.ISMILL === false) {
+            if (tileState.ISAVAILABLE === true) {
                 tileState.ISMILL = true;
                 for (let j = start; j <= end; j++) {
                     let otherState = checkRow ? move.BOARD[move.ROW][j] : move.BOARD[j][move.COL];
@@ -47,13 +47,12 @@ function checkMill(move, start, end, checkRow, gameProperties) {
                             if (tileState.OTHER_MILLS === undefined || tileState.OTHER_MILLS === null) {
                                 tileState.OTHER_MILLS = [];
                             }
-                            tileState.OTHER_MILLS.push(checkRow ? [
-                                [move.ROW],
-                                [j]
-                            ] : [
-                                [j],
-                                [move.COL]
-                            ]);
+
+                            if (checkRow) {
+                                tileState.OTHER_MILLS.push({ROW: move.ROW, COL: j});
+                            } else {
+                                tileState.OTHER_MILLS.push({ROW: j, COL: move.COL});
+                            }
                         }
                     }
                 }
