@@ -208,6 +208,7 @@ function removeSoldier(move, gameProperties, otherTurn) {
             let piece = move.BOARD[move.ROW][move.COL];
             piece.TURN = null;
             piece.ISMILL = false;
+            removingPiece.MILLPIECES--;
 
             let mills = piece.OTHER_MILLS;
             if (mills !== null && mills !== undefined) {
@@ -233,6 +234,9 @@ function shiftSoldier(move, gameProperties) {
         // reset state of current
         move.BOARD[move.ROW][move.COL].TURN = null;
         if (move.BOARD[move.ROW][move.COL].ISMILL === true) {
+            move.BOARD[move.ROW][move.COL].ISMILL = false;
+            move.TURN === common.PURPLE_TURN ?
+                gameProperties.PURPLE_PLAYER.MILLPIECES-- : gameProperties.YELLOW_PLAYER.MILLPIECES--;
             let mills = move.BOARD[move.ROW][move.COL].OTHER_MILLS;
             move.BOARD[move.ROW][move.COL].ISMILL = false;
             if (mills !== null && mills !== undefined) {
@@ -596,6 +600,10 @@ function getChildren(board, turn, gameProperties) {
 
                                     if (copyBoard[row][col].ISMILL === true) {
                                         copyBoard[row][col].ISMILL = false;
+                                        turn === common.YELLOW_TURN ?
+                                            copyGameProperties.YELLOW_PLAYER.MILLPIECES-- :
+                                            copyGameProperties.PURPLE_PLAYER.MILLPIECES--;
+
                                         let mills = copyBoard[row][col].OTHER_MILLS;
                                         if (mills !== null && mills !== undefined) {
                                             // console.log("clearing mills for");
@@ -717,9 +725,9 @@ function phase2WithComputer() {
             if (GAME_PROPERTIES.TURN === common.YELLOW_TURN ?
                 GAME_PROPERTIES.YELLOW_PLAYER.PLACED === 3 :
                 GAME_PROPERTIES.PURPLE_PLAYER.PLACED === 3) {
-                bestM = alphabeta(board, depth, true, GAME_PROPERTIES.TURN, GAME_PROPERTIES, -Infinity, Infinity);
+                bestM = alphabeta(board, 2, true, GAME_PROPERTIES.TURN, GAME_PROPERTIES, -Infinity, Infinity);
             } else {
-                bestM = alphabeta(board, depth, true, GAME_PROPERTIES.TURN, GAME_PROPERTIES, -Infinity, Infinity);
+                bestM = alphabeta(board, 3, true, GAME_PROPERTIES.TURN, GAME_PROPERTIES, -Infinity, Infinity);
             }
             board = bestM.BOARD;
 
