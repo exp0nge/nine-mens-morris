@@ -39,7 +39,7 @@ function checkMill(move, start, end, checkRow, gameProperties) {
         for (let i = start; i <= end; i++) {
             let tileState = checkRow ? move.BOARD[move.ROW][i] : move.BOARD[i][move.COL];
             if (tileState.ISAVAILABLE === true) {
-                tileState.ISMILL = true;
+                tileState.ISMILL++;
                 for (let j = start; j <= end; j++) {
                     let otherState = checkRow ? move.BOARD[move.ROW][j] : move.BOARD[j][move.COL];
                     if (otherState.ISAVAILABLE === true) {

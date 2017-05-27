@@ -9,7 +9,7 @@ import * as common from './common.js';
 // Structs
 const TILE = {
     ISAVAILABLE: true,
-    ISMILL: false,
+    ISMILL: 0,
     TURN: null
 };
 
@@ -22,7 +22,7 @@ function init() {
         for (let j = 0; j < 7; j++) {
             board[i][j] = {
                 ISAVAILABLE: true,
-                ISMILL: false,
+                ISMILL: 0,
                 TURN: null
             };
         }
@@ -197,30 +197,39 @@ function removeSoldier(move, gameProperties, otherTurn) {
         return false;
     }
 
-    if (!move.BOARD[move.ROW][move.COL].ISMILL) { // not a mill
+    if (move.BOARD[move.ROW][move.COL].ISMILL === 0) { // not a mill
         move.BOARD[move.ROW][move.COL].TURN = null;
         removingPiece.PLACED--;
         // findPosition(removingPiece.POSITION, move.ROW, move.COL);
         // removingPiece
         return true;
     } else { // is a mill
-        if (removingPiece.PLACED > 0 && removingPiece.PLACED - removingPiece.MILLPIECES <= 0) { // Removing from mill is possible if only mills are left
+        if (removingPiece.PLACED > 0 && removingPiece.PLACED - removingPiece.MILLPIECES === 0) { // Removing from mill is possible if only mills are left
             let piece = move.BOARD[move.ROW][move.COL];
             piece.TURN = null;
-            piece.ISMILL = false;
-            removingPiece.MILLPIECES--;
+            if (piece.ISMILL > 0) {
+                piece.ISMILL--;
+                removingPiece.MILLPIECES--;
+            }
 
             let mills = piece.OTHER_MILLS;
-            piece.OTHER_MILLS = [];
+
+            if (piece.ISMILL === 0) {
+                piece.OTHER_MILLS = [];
+            }
             if (mills !== null && mills !== undefined) {
                 // console.log("clearing mills for");
                 // console.log(mills);
                 for (let i = 0; i < mills.length; i++) {
                     // invalidate mills
-                    move.BOARD[mills[i].ROW][mills[i].COL].ISMILL = false;
-                    move.BOARD[mills[i].ROW][mills[i].COL].OTHER_MILLS = [];
+                    if (move.BOARD[mills[i].ROW][mills[i].COL].ISMILL > 0){
+                        move.BOARD[mills[i].ROW][mills[i].COL].ISMILL--;
+                        removingPiece.MILLPIECES--;
+                    }
 
-                    removingPiece.MILLPIECES--;
+                    if (move.BOARD[mills[i].ROW][mills[i].COL].ISMILL === 0) {
+                        move.BOARD[mills[i].ROW][mills[i].COL].OTHER_MILLS = [];
+                    }
                 }
             }
             removingPiece.PLACED--;
@@ -236,23 +245,31 @@ function shiftSoldier(move, gameProperties) {
         // console.log(move);
         // reset state of current
         move.BOARD[move.ROW][move.COL].TURN = null;
-        if (move.BOARD[move.ROW][move.COL].ISMILL === true) {
-            move.BOARD[move.ROW][move.COL].ISMILL = false;
+        if (move.BOARD[move.ROW][move.COL].ISMILL > 0) {
+            move.BOARD[move.ROW][move.COL].ISMILL--;
             move.TURN === common.PURPLE_TURN ?
                 gameProperties.PURPLE_PLAYER.MILLPIECES-- : gameProperties.YELLOW_PLAYER.MILLPIECES--;
+
             let mills = move.BOARD[move.ROW][move.COL].OTHER_MILLS;
-            move.BOARD[move.ROW][move.COL].OTHER_MILLS = [];
+
+            if (move.BOARD[move.ROW][move.COL].ISMILL === 0) {
+                move.BOARD[move.ROW][move.COL].OTHER_MILLS = [];
+            }
 
             if (mills !== null && mills !== undefined) {
                 // console.log("clearing mills for");
                 // console.log(mills);
                 for (let i = 0; i < mills.length; i++) {
                     // invalidate mills
-                    move.BOARD[mills[i].ROW][mills[i].COL].ISMILL = false;
-                    move.BOARD[mills[i].ROW][mills[i].COL].OTHER_MILLS = [];
+                    if (move.BOARD[mills[i].ROW][mills[i].COL].ISMILL > 0) {
+                        move.BOARD[mills[i].ROW][mills[i].COL].ISMILL--;
+                        move.TURN === common.PURPLE_TURN ?
+                            gameProperties.PURPLE_PLAYER.MILLPIECES-- : gameProperties.YELLOW_PLAYER.MILLPIECES--;
+                    }
 
-                    move.TURN === common.PURPLE_TURN ?
-                        gameProperties.PURPLE_PLAYER.MILLPIECES-- : gameProperties.YELLOW_PLAYER.MILLPIECES--;
+                    if (move.BOARD[mills[i].ROW][mills[i].COL].ISMILL === 0) {
+                        move.BOARD[mills[i].ROW][mills[i].COL].OTHER_MILLS = [];
+                    }
                 }
             }
         }
@@ -267,7 +284,7 @@ function shiftSoldier(move, gameProperties) {
 
 function isMillBreakable(gameProperties) {
     let removingPiece = (((gameProperties.TURN + 1) % 2) === common.PURPLE_TURN) ? gameProperties.PURPLE_PLAYER : gameProperties.YELLOW_PLAYER;
-    return removingPiece.PLACED > 0 && removingPiece.PLACED - removingPiece.MILLPIECES <= 0;
+    return removingPiece.PLACED > 0 && removingPiece.PLACED - removingPiece.MILLPIECES === 0;
 }
 
 function handleNewMills(move, gameProperties) {
@@ -383,8 +400,8 @@ function phaseOneHandler(e) {
 }
 
 function alertIfWinner() {
-    if ((GAME_PROPERTIES.PURPLE_PLAYER.PLACED < 3 && GAME_PROPERTIES.PURPLE_PLAYER.AVAILABLE <= 0) ||
-        (GAME_PROPERTIES.YELLOW_PLAYER.PLACED < 3 && GAME_PROPERTIES.YELLOW_PLAYER.AVAILABLE <= 0)) {
+    if ((GAME_PROPERTIES.PURPLE_PLAYER.PLACED < 3 && GAME_PROPERTIES.PURPLE_PLAYER.AVAILABLE === 0) ||
+        (GAME_PROPERTIES.YELLOW_PLAYER.PLACED < 3 && GAME_PROPERTIES.YELLOW_PLAYER.AVAILABLE === 0)) {
         clearElement(turnPromptText);
         clearElement(turnText);
         document.getElementById("phaseText").innerHTML = "WINNER " +
@@ -604,24 +621,33 @@ function getChildren(board, turn, gameProperties) {
                                     copyBoard[i][j].TURN = turn;
                                     copyBoard[row][col].TURN = null;
 
-                                    if (copyBoard[row][col].ISMILL === true) {
-                                        copyBoard[row][col].ISMILL = false;
+                                    if (copyBoard[row][col].ISMILL > 0) {
+                                        copyBoard[row][col].ISMILL--;
                                         turn === common.YELLOW_TURN ?
                                             copyGameProperties.YELLOW_PLAYER.MILLPIECES-- :
                                             copyGameProperties.PURPLE_PLAYER.MILLPIECES--;
 
                                         let mills = copyBoard[row][col].OTHER_MILLS;
-                                        copyBoard[row][col].OTHER_MILLS = [];
+                                        if (copyBoard[row][col].ISMILL === 0) {
+                                            copyBoard[row][col].OTHER_MILLS = [];
+                                        }
 
                                         if (mills !== null && mills !== undefined) {
                                             // console.log("clearing mills for");
                                             // console.log(mills);
                                             for (let k = 0; k < mills.length; k++) {
                                                 // invalidate mills
-                                                copyBoard[mills[k].ROW][mills[k].COL].ISMILL = false;
-                                                turn === common.YELLOW_TURN ?
-                                                    copyGameProperties.YELLOW_PLAYER.MILLPIECES-- :
-                                                    copyGameProperties.PURPLE_PLAYER.MILLPIECES--;
+                                                if (copyBoard[mills[k].ROW][mills[k].COL].ISMILL > 0) {
+                                                    copyBoard[mills[k].ROW][mills[k].COL].ISMILL--;
+                                                    turn === common.YELLOW_TURN ?
+                                                        copyGameProperties.YELLOW_PLAYER.MILLPIECES-- :
+                                                        copyGameProperties.PURPLE_PLAYER.MILLPIECES--;
+                                                }
+
+                                                if (copyBoard[mills[k].ROW][mills[k].COL].ISMILL === 0) {
+                                                    copyBoard[mills[k].ROW][mills[k].COL].OTHER_MILLS = [];
+                                                }
+
                                             }
                                         }
                                     }
@@ -673,7 +699,7 @@ function handleNewMillsComputer(move, gameProperties) {
         let removeMillPiece = false;
 
         let removingPiece = (otherTurn === common.PURPLE_TURN) ? gameProperties.PURPLE_PLAYER : gameProperties.YELLOW_PLAYER;
-        if (removingPiece.PLACED > 0 && removingPiece.PLACED - removingPiece.MILLPIECES <= 0) { // Removing from mill is possible if only mills are left
+        if (removingPiece.PLACED > 0 && removingPiece.PLACED - removingPiece.MILLPIECES === 0) { // Removing from mill is possible if only mills are left
             removeMillPiece = true;
         }
 
@@ -682,8 +708,8 @@ function handleNewMillsComputer(move, gameProperties) {
                 move.ROW = row;
                 move.COL = col;
                 if (algorithm.isRemovable(move, otherTurn)) {
-                    if ((removeMillPiece && move.BOARD[move.ROW][move.COL].ISMILL) ||
-                        (!removeMillPiece && !move.BOARD[move.ROW][move.COL].ISMILL)) {
+                    if ((removeMillPiece && move.BOARD[move.ROW][move.COL].ISMILL > 0) ||
+                        (!removeMillPiece && move.BOARD[move.ROW][move.COL].ISMILL === 0)) {
                         removeSoldier(move, gameProperties, otherTurn);
                         --numMills;
                         // Break out of both loops
@@ -716,6 +742,7 @@ function phase1WithComputer() {
             updateBoardUI();
 
             GAME_PROPERTIES = bestM.PROPERTIES;
+            console.log(GAME_PROPERTIES);
             GAME_PROPERTIES.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
             // printBoard();
             GAME_PROPERTIES.AI_TURN = otherPlayer();
