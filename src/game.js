@@ -708,13 +708,14 @@ function phase1WithComputer() {
     if (GAME_PROPERTIES.AI_TURN === GAME_PROPERTIES.TURN) {
         setTimeout(() => {
             // console.log("BEEP PLAYING");
+            depth = document.getElementById("depth").value;
+
             let bestM = alphabeta(board, depth, true, GAME_PROPERTIES.TURN, GAME_PROPERTIES, -Infinity, Infinity);
             board = bestM.BOARD;
             console.log(board);
             updateBoardUI();
 
             GAME_PROPERTIES = bestM.PROPERTIES;
-            console.log(GAME_PROPERTIES);
             GAME_PROPERTIES.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
             // printBoard();
             GAME_PROPERTIES.AI_TURN = otherPlayer();
@@ -730,12 +731,14 @@ function phase2WithComputer() {
         setTimeout(() => {
             // console.log("BEEP PHASE 2 PLAYING");
             let bestM;
+            depth = document.getElementById("depth").value;
+
             if (GAME_PROPERTIES.TURN === common.YELLOW_TURN ?
                 GAME_PROPERTIES.YELLOW_PLAYER.PLACED === 3 :
                 GAME_PROPERTIES.PURPLE_PLAYER.PLACED === 3) {
-                bestM = alphabeta(board, 2, true, GAME_PROPERTIES.TURN, GAME_PROPERTIES, -Infinity, Infinity);
+                bestM = alphabeta(board, depth, true, GAME_PROPERTIES.TURN, GAME_PROPERTIES, -Infinity, Infinity);
             } else {
-                bestM = alphabeta(board, 3, true, GAME_PROPERTIES.TURN, GAME_PROPERTIES, -Infinity, Infinity);
+                bestM = alphabeta(board, depth, true, GAME_PROPERTIES.TURN, GAME_PROPERTIES, -Infinity, Infinity);
             }
             board = bestM.BOARD;
 

@@ -85,18 +85,14 @@
                 </div>
                 <div id="depth-control">
                     <footer class="card-footer center">
-                        <article class="message is-danger container">
+                        <article class="message is-danger container center">
                             <div class="message-body">
-                                Entering depths greater than 3 will result in much longer wait times.
-
-                                <form class="center">
-                                    <p class="control card-footer-item">
-                                        <span class="tag is-primary is-medium" style="margin-right: 5px;">Depth</span>
-                                        <input type="hidden" value="True" name="ai" />
-                                        <input id="depth" type="number" class="input" min="0" value="3" style="margin-right: 5px;" name="depth" />
-                                        <button class=" button is-primary ">Submit</button>
-                                    </p>
-                                </form>
+                                Control how far the AI can lookahead. <br> Entering depths greater than 3 will result in much longer wait times.
+                                <p class="control card-footer-item">
+                                    <span class="tag is-primary is-medium" style="margin-right: 5px;">Depth</span>
+                                    <input type="hidden" value="True" name="ai" />
+                                    <input id="depth" type="number" class="input" min="0" value="3" style="margin-right: 5px;" name="depth" />
+                                </p>
                             </div>
                         </article>
                     </footer>
@@ -127,11 +123,11 @@
                 <p>
                     Created by
                     <a href="https://github.com/cyang ">Christopher Yang</a> + <a href="https://github.com/exp0nge ">MD R. Islam</a> for CS 448 with Professor Lucci @ City College of New York.
-                        </p>
+                </p>
             </div>
         </div>
-        </footer>
-        <script src="./lib/main-bundle.js " charset="utf-8 "></script>
+    </footer>
+    <script src="./lib/main-bundle.js " charset="utf-8 "></script>
 </body>
 
 </html>
