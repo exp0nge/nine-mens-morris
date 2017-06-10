@@ -77,13 +77,8 @@ var GAME_PROPERTIES = {
 };
 
 function checkLose(gameProperties) {
-    if (gameProperties.PURPLE_PLAYER.PLACED < 3 && gameProperties.PURPLE_PLAYER.AVAILABLE === 0) {
-        return common.PURPLE_TURN;
-    } else if (gameProperties.YELLOW_PLAYER.PLACED < 3 && gameProperties.YELLOW_PLAYER.AVAILABLE === 0) {
-        return common.YELLOW_TURN;
-    } else {
-        return null;
-    }
+    return gameProperties.PURPLE_PLAYER.AVAILABLE === 0 && gameProperties.YELLOW_PLAYER.AVAILABLE === 0 &&
+    (gameProperties.PURPLE_PLAYER.PLACED < 3 || gameProperties.YELLOW_PLAYER.PLACED < 3);
 }
 
 function otherPlayer() {
@@ -204,7 +199,7 @@ function removeSoldier(move, gameProperties, otherTurn) {
         // removingPiece
         return true;
     } else { // is a mill
-        if (removingPiece.PLACED > 0 && removingPiece.PLACED - removingPiece.MILLPIECES === 0) { // Removing from mill is possible if only mills are left
+        if (removingPiece.PLACED > 0 && removingPiece.PLACED - removingPiece.MILLPIECES <= 0) { // Removing from mill is possible if only mills are left
             let piece = move.BOARD[move.ROW][move.COL];
             piece.TURN = null;
             if (piece.ISMILL > 0) {
@@ -284,7 +279,7 @@ function shiftSoldier(move, gameProperties) {
 
 function isMillBreakable(gameProperties) {
     let removingPiece = (((gameProperties.TURN + 1) % 2) === common.PURPLE_TURN) ? gameProperties.PURPLE_PLAYER : gameProperties.YELLOW_PLAYER;
-    return removingPiece.PLACED > 0 && removingPiece.PLACED - removingPiece.MILLPIECES === 0;
+    return removingPiece.PLACED > 0 && removingPiece.PLACED - removingPiece.MILLPIECES <= 0;
 }
 
 function handleNewMills(move, gameProperties) {
@@ -509,25 +504,26 @@ setUpClicks((e) => {
 
 
 function scoreBoard(turn, maxPlayer, gameProperties, depth) {
-    if (checkLose(gameProperties) !== null) {
-        if (checkLose(gameProperties) === turn) {
-            return 100000 + depth;
-        } else {
-            return -100000 - depth;
-        }
-    }
-    // Random number from 0 to 1 to choose between any equal board score randomly
     let r = Math.random();
-    let score = turn === common.YELLOW_TURN ?
-        gameProperties.YELLOW_PLAYER.PLACED - gameProperties.PURPLE_PLAYER.PLACED :
-        gameProperties.PURPLE_PLAYER.PLACED - gameProperties.YELLOW_PLAYER.PLACED;
+    let score = 0;
 
-    return maxPlayer ? score * (r * 0.01) : score * (r * (-0.01));
+    if (checkLose(gameProperties) &&
+        ((turn === common.YELLOW_TURN && gameProperties.PURPLE_PLAYER.PLACED < 3) ||
+            (turn === common.PURPLE_TURN && gameProperties.YELLOW_PLAYER.PLACED < 3))) {
+        score = 100000 + depth;
+    } else {
+        // Random number from 0 to 1 to choose between any equal board score randomly
+        // let r = Math.random();
+        score = turn === common.YELLOW_TURN ?
+            gameProperties.YELLOW_PLAYER.PLACED - gameProperties.PURPLE_PLAYER.PLACED :
+            gameProperties.PURPLE_PLAYER.PLACED - gameProperties.YELLOW_PLAYER.PLACED;
+    }
+    return maxPlayer ? score + r : -(score + r);
 }
 
 
 function alphabeta(board, depth, maxPlayer, turn, gameProperties, alpha, beta) {
-    if (depth === 0 || (checkLose(gameProperties) !== null)) {
+    if (depth === 0 || checkLose(gameProperties)) {
         return {
             VALUE: scoreBoard(turn, maxPlayer, gameProperties, depth),
             BOARD: board,
@@ -699,7 +695,7 @@ function handleNewMillsComputer(move, gameProperties) {
         let removeMillPiece = false;
 
         let removingPiece = (otherTurn === common.PURPLE_TURN) ? gameProperties.PURPLE_PLAYER : gameProperties.YELLOW_PLAYER;
-        if (removingPiece.PLACED > 0 && removingPiece.PLACED - removingPiece.MILLPIECES === 0) { // Removing from mill is possible if only mills are left
+        if (removingPiece.PLACED > 0 && removingPiece.PLACED - removingPiece.MILLPIECES <= 0) { // Removing from mill is possible if only mills are left
             removeMillPiece = true;
         }
 
@@ -738,11 +734,10 @@ function phase1WithComputer() {
 
             let bestM = alphabeta(board, depth, true, GAME_PROPERTIES.TURN, GAME_PROPERTIES, -Infinity, Infinity);
             board = bestM.BOARD;
-            console.log(board);
             updateBoardUI();
+            // console.log(bestM);
 
             GAME_PROPERTIES = bestM.PROPERTIES;
-            console.log(GAME_PROPERTIES);
             GAME_PROPERTIES.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
             // printBoard();
             GAME_PROPERTIES.AI_TURN = otherPlayer();
@@ -769,11 +764,10 @@ function phase2WithComputer() {
             }
             board = bestM.BOARD;
 
-            console.log(board);
             updateBoardUI();
 
             GAME_PROPERTIES = bestM.PROPERTIES;
-            console.log(GAME_PROPERTIES);
+            // console.log(bestM);
 
             GAME_PROPERTIES.TURN = (GAME_PROPERTIES.TURN + 1) % 2;
             // printBoard();
